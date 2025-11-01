@@ -58,9 +58,31 @@ pip install -r requirements.txt
 ```
 
 ### Running the Application
+Local Development (without Docker):
 
 ```bash
 python src/app.py
+```
+
+With Docker (Development Mode):
+```bash
+# Build the image
+docker build -t cafeteria-management-app:latest .
+
+# Run the container
+docker run --rm -p 5000:5000 cafeteria-management-app:latest
+```
+
+With Docker (Production Mode):
+```bash
+# Run with production config
+docker run --rm -p 5000:5000 -e FLASK_ENV=production cafeteria-management-app:latest
+
+# With persistent data storage
+docker run --rm -p 5000:5000 \
+  -e FLASK_ENV=production \
+  -v cafeteria-data:/app/instance \
+  cafeteria-management-app:latest
 ```
 
 The application will be available at `http://localhost:5000`

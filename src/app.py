@@ -8,6 +8,9 @@ app = Flask(__name__)
 
 # Load configuration
 config_name = os.environ.get('FLASK_ENV', 'development')
+# Map 'production' to 'default' if not explicitly set
+if config_name not in config:
+    config_name = 'default'
 app.config.from_object(config[config_name])
 
 # Initialize database
@@ -171,4 +174,10 @@ def delete_user(user_id):
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
+    # Create tables if they don't exist (useful for Docker)
+    with app.app_context():
+        db.create_all()
+        print("✅ Database tables created/verified")
+    
+    # Run the application
     app.run(host='0.0.0.0', port=5000, debug=True)
