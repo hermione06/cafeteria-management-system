@@ -13,7 +13,7 @@ class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        f'sqlite:///{basedir}/instance/cafeteria_dev.db'
+        'sqlite:////app/instance/cafeteria_dev.db'
 
 class TestingConfig(Config):
     """Testing configuration"""
@@ -25,7 +25,8 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:////app/instance/cafeteria.db'
 
 # Configuration dictionary
 config = {
