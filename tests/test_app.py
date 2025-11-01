@@ -5,15 +5,20 @@ import json
 # Add the 'src' directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
+import pytest
+
+# Set testing config BEFORE importing app
+os.environ['FLASK_ENV'] = 'testing'
+
 from app import app, db
 from models import User
-import pytest
 
 @pytest.fixture
 def client():
     """Create a test client with in-memory database"""
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     with app.test_client() as client:
         with app.app_context():
