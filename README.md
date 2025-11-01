@@ -21,15 +21,35 @@ A Flask-based web application for managing cafeteria operations including menu m
 ```
 cafeteria-management-system/
 ├── .github/
-│   └── workflows/       # CI/CD workflows
+│   └── workflows/
+│       └── ci.yml              # GitHub Actions CI pipeline
+├── migrations/                 # Database migrations
+│   ├── versions/               # Migration version files
+│   └── alembic.ini             # Alembic configuration
 ├── src/
-│   └── app.py          # Main Flask application
+│   ├── app.py                  # Main Flask application
+│   ├── models.py               # SQLAlchemy models
+│   └── config.py               # Configuration settings
 ├── tests/
-│   └── test_app.py     # Unit tests
-├── requirements.txt    # Python dependencies
-├── Dockerfile          # Docker configuration
-└── README.md          # Project documentation
+│   └── test_app.py             # Unit tests
+├── instance/                   # Database files (gitignored)
+├── venv/                       # Virtual environment (gitignored)
+├── .dockerignore               # Docker ignore rules
+├── .env                        # Environment variables (gitignored)
+├── .gitignore                  # Git ignore rules
+├── Dockerfile                  # Docker container configuration
+├── requirements.txt            # Python dependencies
+└── README.md                   # Documentation
 ```
+## 🛠️ Tech Stack
+
+Backend: Flask 3.0
+Database: SQLAlchemy + SQLite (dev), PostgreSQL (production ready)
+Migrations: Flask-Migrate (Alembic)
+Testing: Pytest
+CI/CD: GitHub Actions
+Containerization: Docker
+Deployment: Render (planned)
 
 ## Setup Instructions
 
@@ -56,6 +76,36 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
+### Set up environment variables:
+
+```bash
+# Create .env file (already in .gitignore)
+   cp .env.example .env  # Or create manually
+```
+#### Add to .env:
+FLASK_APP=src/app.py
+FLASK_ENV=development
+SECRET_KEY=your-secret-key-here
+
+### Initialize the database:
+
+```bash
+# Create instance directory
+   mkdir -p instance
+
+   # Initialize migrations (if not done)
+   flask db init
+
+   # Create migration
+   flask db migrate -m "Initial migration"
+
+   # Apply migrations
+   flask db upgrade
+
+   # OR simply create tables directly
+   python -c "import sys; sys.path.insert(0, 'src'); from app import app, db; app.app_context().push(); db.create_all(); print('✅ Tables created!')"
+```
+
 
 ### Running the Application
 Local Development (without Docker):
@@ -125,6 +175,13 @@ pytest -v
 - [ ] CD pipeline
 - [ ] Cloud deployment on Render
 - [ ] Monitoring and logging
+
+## 👨‍💻 Team Members
+
+Asiman Ismayilova 
+Rashid Huseynov
+Tamilla Iskandarova
+Ali Gasimov
 
 ## Contributing
 This is an educational project. Feel free to fork and experiment!
