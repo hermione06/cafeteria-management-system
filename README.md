@@ -42,7 +42,7 @@ cafeteria-management-system/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/cafeteria-management-system.git
+git clone https://github.com/hermione06/cafeteria-management-system.git
 cd cafeteria-management-system
 ```
 
@@ -91,7 +91,7 @@ pytest -v
 - [x] Basic Flask application
 - [x] Initial API endpoints
 - [x] Unit tests setup
-- [ ] CI pipeline with GitHub Actions
+- [x] CI pipeline with GitHub Actions
 
 ### Phase 2: Core Features
 - [ ] Database integration

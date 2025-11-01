@@ -43,9 +43,15 @@ htmlcov/
 instance/
 .webassets-cache
 
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
 # Environment variables
 .env
 .env.local
+.flaskenv
 
 # OS
 .DS_Store
