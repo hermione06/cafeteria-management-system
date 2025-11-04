@@ -1,8 +1,11 @@
 import os
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt
 from models import db, User
 from config import config
+from auth import auth_bp
+from decorators import admin_required
 
 app = Flask(__name__)
 
@@ -13,9 +16,13 @@ if config_name not in config:
     config_name = 'default'
 app.config.from_object(config[config_name])
 
-# Initialize database
+# Initialize extensions
 db.init_app(app)
 migrate = Migrate(app, db)
+jwt = JWTManager(app)
+
+# Register blueprints
+app.register_blueprint(auth_bp)
 
 # In-memory storage for menu items (will be replaced with database later)
 menu_items = [
@@ -58,17 +65,28 @@ def get_menu_by_category(category):
         return jsonify({"category": category, "items": filtered_items}), 200
     return jsonify({"message": f"No items found in category: {category}"}), 200
 
-# User Management Endpoints
+# User Management Endpoints (Protected)
 
 @app.route('/users', methods=['GET'])
+@jwt_required()
+@admin_required()
 def get_users():
-    """Get all users"""
+    """Get all users (Admin only)"""
     users = User.query.all()
     return jsonify({"users": [user.to_dict() for user in users]}), 200
 
 @app.route('/users/<int:user_id>', methods=['GET'])
+@jwt_required()
 def get_user(user_id):
-    """Get a specific user by ID"""
+    """Get a specific user by ID (Users can view their own, admins can view all)"""
+    from flask_jwt_extended import get_jwt_identity
+    current_user_id = get_jwt_identity()
+    claims = get_jwt()
+    
+    # Allow if admin or viewing own profile
+    if claims.get('role') != 'admin' and current_user_id != user_id:
+        return jsonify({"error": "Access denied"}), 403
+    
     user = db.session.get(User, user_id)
     if user:
         return jsonify(user.to_dict()), 200
@@ -116,7 +134,7 @@ def create_user():
 @app.route('/users/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     """Update an existing user"""
-    user = db.session.get(User, user_id)
+    user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
     
@@ -161,7 +179,7 @@ def update_user(user_id):
 @app.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     """Delete a user"""
-    user = db.session.get(User, user_id)
+    user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
     

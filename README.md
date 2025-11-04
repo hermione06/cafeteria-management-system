@@ -106,6 +106,20 @@ SECRET_KEY=your-secret-key-here
    python -c "import sys; sys.path.insert(0, 'src'); from app import app, db; app.app_context().push(); db.create_all(); print('✅ Tables created!')"
 ```
 
+If there is issue related to this:
+```bash
+# 1. Delete the database
+rm -f instance/cafeteria_dev.db
+
+# 2. Delete migration versions (keep migrations folder and env.py)
+rm -f migrations/versions/*.py
+
+# 3. Create fresh initial migration
+flask db migrate -m "Initial migration with authentication"
+
+# 4. Apply migration
+flask db upgrade
+```
 
 ### Running the Application
 Local Development (without Docker):
