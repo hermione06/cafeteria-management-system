@@ -102,9 +102,9 @@ def create_user():
         return jsonify({"error": "Username and email are required"}), 400
     
     # Validate role if provided
-    role = data.get('role', 'customer')
+    role = data.get('role', 'user')
     if not User.validate_role(role):
-        return jsonify({"error": "Invalid role. Must be: customer, staff, or admin"}), 400
+        return jsonify({"error": "Invalid role. Must be: user, or admin"}), 400
     
     # Check if username or email already exists
     if User.query.filter_by(username=data['username']).first():
@@ -118,8 +118,10 @@ def create_user():
         new_user = User(
             username=data['username'],
             email=data['email'],
-            role=role
+            role=role,
         )
+        new_user.set_password(data['password'])
+
         db.session.add(new_user)
         db.session.commit()
         
@@ -134,7 +136,7 @@ def create_user():
 @app.route('/users/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     """Update an existing user"""
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
     
@@ -179,7 +181,7 @@ def update_user(user_id):
 @app.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     """Delete a user"""
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
     
