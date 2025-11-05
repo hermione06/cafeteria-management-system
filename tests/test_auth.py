@@ -2,6 +2,7 @@ import sys
 import os
 import json
 
+
 # Add the 'src' directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
@@ -17,6 +18,7 @@ from models import User
 def client():
     """Create a test client with in-memory database"""
     app.config['TESTING'] = True
+    app.config['SECRET_KEY'] = app.config.get('SECRET_KEY', 'test-secret')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
