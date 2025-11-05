@@ -11,6 +11,9 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    env:
+      SECRET_KEY: test-secret
     
     steps:
       # Step 1: Checkout the repository code
