@@ -171,6 +171,10 @@ pytest -v
 | GET | `/menu` | Get all menu items |
 | GET | `/menu/<id>` | Get specific menu item |
 
+## For Testing, Refer to Postman Link: 
+https://app.getpostman.com/join-team?invite_code=b4e138937dcf46feb30542e57dc7e753b1cbb14a7ee90d6f368c6ba5fcb15723&target_code=3ed5366b77e93ca5703f89941a0075bb
+
+
 ## Development Roadmap
 
 ### Phase 1: Foundation (Current)
