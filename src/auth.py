@@ -174,7 +174,7 @@ def logout():
 def get_current_user():
     """Get current logged-in user's information"""
     user_id = get_jwt_identity()
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -261,7 +261,7 @@ def change_password():
     if not data or not data.get('old_password') or not data.get('new_password'):
         return jsonify({"error": "Old password and new password are required"}), 400
     
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     
     if not user:
         return jsonify({"error": "User not found"}), 404

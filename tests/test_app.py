@@ -78,12 +78,14 @@ def test_user_model_creation(client):
     """Test creating a user model instance"""
     with app.app_context():
         user = User(username='testuser', email='test@example.com', role='customer')
+        user.set_password("testpassword")  # ✅ Hash and set password
         db.session.add(user)
         db.session.commit()
         
         assert user.id is not None
         assert user.username == 'testuser'
         assert user.email == 'test@example.com'
+        assert user.check_password("testpassword") is True
         assert user.role == 'customer'
         assert user.is_active is True
 
@@ -91,6 +93,7 @@ def test_user_to_dict(client):
     """Test user to_dict method"""
     with app.app_context():
         user = User(username='dictuser', email='dict@example.com')
+        user.set_password("dictpassword123")
         db.session.add(user)
         db.session.commit()
         
@@ -102,27 +105,47 @@ def test_user_to_dict(client):
 
 def test_user_validate_role():
     """Test role validation method"""
-    assert User.validate_role('customer') is True
-    assert User.validate_role('staff') is True
+    assert User.validate_role('customer') is False
+    assert User.validate_role('user') is True
     assert User.validate_role('admin') is True
     assert User.validate_role('invalid') is False
 
 # ===== User API Endpoints Tests =====
 
-def test_get_users_empty(client):
-    """Test getting users when database is empty"""
-    response = client.get('/users')
+def test_get_users_authenticated_admin(client):
+    """Test getting users when admin is logged in"""
+    admin = User(username='admin', email='admin@example.com', role='admin')
+    admin.set_password('password123')
+    admin.verify_email()
+    db.session.add(admin)
+    db.session.commit()
+
+    # Log in as admin
+    login_response = client.post('/auth/login', json={
+        'username': 'admin',
+        'password': 'password123'
+    })
+    assert login_response.status_code == 200
+    token = login_response.get_json()['access_token']
+
+    # Get users
+    response = client.get('/users', headers={'Authorization': f'Bearer {token}'})
     assert response.status_code == 200
-    data = json.loads(response.data)
-    assert data['users'] == []
+
+    data = response.get_json()
+    assert len(data['users']) == 1
+    assert data['users'][0]['username'] == 'admin'
+
 
 def test_create_user_success(client):
     """Test creating a new user successfully"""
     user_data = {
         'username': 'newuser',
         'email': 'newuser@example.com',
-        'role': 'customer'
+        'password': 'password123',
+        'role': 'user'
     }
+    
     response = client.post('/users', 
                           data=json.dumps(user_data),
                           content_type='application/json')
@@ -163,7 +186,8 @@ def test_create_user_duplicate_username(client):
     """Test creating user with duplicate username"""
     user_data = {
         'username': 'duplicate',
-        'email': 'first@example.com'
+        'email': 'first@example.com',
+        'password': 'password123'
     }
     client.post('/users',
                data=json.dumps(user_data),
@@ -172,7 +196,8 @@ def test_create_user_duplicate_username(client):
     # Try to create another user with same username
     user_data2 = {
         'username': 'duplicate',
-        'email': 'second@example.com'
+        'email': 'second@example.com',
+        'password': 'password456'
     }
     response = client.post('/users',
                           data=json.dumps(user_data2),
@@ -186,7 +211,8 @@ def test_create_user_duplicate_email(client):
     """Test creating user with duplicate email"""
     user_data = {
         'username': 'user1',
-        'email': 'duplicate@example.com'
+        'email': 'duplicate@example.com',
+        'password': 'password123'
     }
     client.post('/users',
                data=json.dumps(user_data),
@@ -195,7 +221,8 @@ def test_create_user_duplicate_email(client):
     # Try to create another user with same email
     user_data2 = {
         'username': 'user2',
-        'email': 'duplicate@example.com'
+        'email': 'duplicate@example.com',
+        'password': 'password456'
     }
     response = client.post('/users',
                           data=json.dumps(user_data2),
@@ -210,22 +237,61 @@ def test_get_user_by_id(client):
     # Create a user first
     user_data = {
         'username': 'getuser',
-        'email': 'get@example.com'
+        'email': 'get@example.com',
+        'password': 'password123'
     }
     create_response = client.post('/users',
-                                  data=json.dumps(user_data),
-                                  content_type='application/json')
-    user_id = json.loads(create_response.data)['user']['id']
+                        data=json.dumps(user_data),
+                        content_type='application/json')
+    user = json.loads(create_response.data)['user']
+    user_id = user['id']
     
-    # Get the user
-    response = client.get(f'/users/{user_id}')
+    # Verify the user's email before logging in
+    with app.app_context():
+        test_user = db.session.get(User, user_id)
+        test_user.verify_email()
+        db.session.commit()
+    
+    # Log in to get JWT token
+    login_response = client.post('/auth/login', json={
+        'username': 'getuser',
+        'password': 'password123'
+    })
+    token = login_response.get_json()['access_token']
+    
+    # Now include token in Authorization header
+    response = client.get(f'/users/{user_id}',
+                          headers={'Authorization': f'Bearer {token}'})
+    
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['username'] == 'getuser'
-
 def test_get_user_not_found(client):
     """Test getting a non-existent user"""
-    response = client.get('/users/9999')
+    # Create an admin user to test accessing non-existent users
+    user_data = {
+        'username': 'adminuser',
+        'email': 'admin@example.com',
+        'password': 'password123',
+        'role': 'admin'
+    }
+    create_response = client.post('/users', data=json.dumps(user_data), content_type='application/json')
+    
+    # Verify the admin user's email before logging in
+    user_id = json.loads(create_response.data)['user']['id']
+    with app.app_context():
+        test_user = db.session.get(User, user_id)
+        test_user.verify_email()
+        db.session.commit()
+
+    login_response = client.post('/auth/login', json={
+        'username': 'adminuser',
+        'password': 'password123'
+    })
+    token = login_response.get_json()['access_token']
+
+    # Now test a missing user with admin token
+    response = client.get('/users/9999', headers={'Authorization': f'Bearer {token}'})
     assert response.status_code == 404
     data = json.loads(response.data)
     assert 'User not found' in data['error']
@@ -235,7 +301,8 @@ def test_update_user_success(client):
     # Create a user first
     user_data = {
         'username': 'updateuser',
-        'email': 'update@example.com'
+        'email': 'update@example.com',
+        'password': 'password123'
     }
     create_response = client.post('/users',
                                   data=json.dumps(user_data),
@@ -245,7 +312,7 @@ def test_update_user_success(client):
     # Update the user
     update_data = {
         'username': 'updateduser',
-        'role': 'staff'
+        'role': 'admin'
     }
     response = client.put(f'/users/{user_id}',
                          data=json.dumps(update_data),
@@ -254,7 +321,7 @@ def test_update_user_success(client):
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['user']['username'] == 'updateduser'
-    assert data['user']['role'] == 'staff'
+    assert data['user']['role'] == 'admin'
 
 def test_update_user_not_found(client):
     """Test updating a non-existent user"""
@@ -270,24 +337,53 @@ def test_delete_user_success(client):
     # Create a user first
     user_data = {
         'username': 'deleteuser',
-        'email': 'delete@example.com'
+        'email': 'delete@example.com',
+        'password': 'password123'
     }
     create_response = client.post('/users',
                                   data=json.dumps(user_data),
                                   content_type='application/json')
     user_id = json.loads(create_response.data)['user']['id']
-    
-    # Delete the user
-    response = client.delete(f'/users/{user_id}')
-    assert response.status_code == 200
-    data = json.loads(response.data)
-    assert 'deleted successfully' in data['message']
-    
-    # Verify user is deleted
-    get_response = client.get(f'/users/{user_id}')
-    assert get_response.status_code == 404
 
+    # Verify the user's email before logging in
+    with app.app_context():
+        test_user = db.session.get(User, user_id)
+        test_user.verify_email()
+        db.session.commit()
+
+    # Log in to get token
+    login_response = client.post('/auth/login', json={
+        'username': 'deleteuser',
+        'password': 'password123'
+    })
+    token = json.loads(login_response.data)['access_token']
+
+    # Delete the user (include token)
+    delete_response = client.delete(f'/users/{user_id}',
+                                    headers={'Authorization': f'Bearer {token}'})
+    assert delete_response.status_code == 200
+    data = json.loads(delete_response.data)
+    assert 'deleted successfully' in data['message']
+
+    # Try to get the deleted user (also include token)
+    get_response = client.get(f'/users/{user_id}',
+                              headers={'Authorization': f'Bearer {token}'})
+    assert get_response.status_code == 404
 def test_delete_user_not_found(client):
     """Test deleting a non-existent user"""
     response = client.delete('/users/9999')
     assert response.status_code == 404
+
+
+# TODO: 
+# If you want to make testing easier and avoid repeating set_password() everywhere, you can modify your User model’s __init__ like this:
+
+# def __init__(self, username, email, password=None, **kwargs):
+#     super().__init__(username=username, email=email, **kwargs)
+#     if password:
+#         self.set_password(password)
+
+
+# Then your test can simply be:
+
+# user = User(username='dictuser', email='dict@example.com', password='secure123')
