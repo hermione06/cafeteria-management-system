@@ -1,8 +1,8 @@
-"""Initial migration: Add User model
+"""Initial migration with authentication
 
-Revision ID: 7b7daffe8098
+Revision ID: eeb1e2df9822
 Revises: 
-Create Date: 2025-11-01 13:07:50.055193
+Create Date: 2025-11-04 12:43:26.334792
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7b7daffe8098'
+revision = 'eeb1e2df9822'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,11 +22,19 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=80), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('password_hash', sa.String(length=255), nullable=False),
     sa.Column('role', sa.String(length=20), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.Column('is_verified', sa.Boolean(), nullable=False),
+    sa.Column('verification_token', sa.String(length=100), nullable=True),
+    sa.Column('reset_token', sa.String(length=100), nullable=True),
+    sa.Column('reset_token_expiry', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('last_login', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('reset_token'),
+    sa.UniqueConstraint('verification_token')
     )
     with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_users_email'), ['email'], unique=True)
