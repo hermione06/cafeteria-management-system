@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard | Cafeteria System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard student">
+  <header class="navbar">
+    <h1>Welcome, Student!</h1>
+    <nav>
+      <a href="menu.html">Menu</a>
+      <a href="#" id="orders-link">My Orders</a>
+      <a href="#" id="logout-btn">Logout</a>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+    <section class="profile-card">
+      <h2>My Profile</h2>
+      <div id="student-info">
+        <p><strong>Name:</strong> Jane Doe</p>
+        <p><strong>Email:</strong> jane@student.ufaz.edu.az</p>
+        <p><strong>Student ID:</strong> #12345</p>
+      </div>
+    </section>
+
+    <section class="orders-section">
+      <h2>My Orders</h2>
+      <div id="orders-list" class="grid">
+        <!-- Orders fetched dynamically from /order -->
+      </div>
+    </section>
+
+    <section class="menu-preview">
+      <h2>Today’s Menu</h2>
+      <div id="menu-preview-list" class="grid">
+        <!-- Menu fetched from /menu -->
+      </div>
+      <button id="view-full-menu">View Full Menu</button>
+    </section>
+  </main>
+
+  <script src="js/student_dashboard.js"></script>
+</body>
+</html>

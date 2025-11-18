@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Menu - Cafeteria{% endblock %}
+
+{% block content %}
+<section style="padding: 2rem 1rem; text-align: center;">
+  <h1>🍽️ Today's Menu</h1>
+  <p>Explore our delicious meals and add your favorites to your order.</p>
+
+  <div class="card-container" id="menu-container" style="margin-top: 2rem;">
+    <!-- Sample placeholders; later replaced by Flask/Javascript -->
+    <div class="card">
+      <h3>🥗 Caesar Salad</h3>
+      <p>Fresh lettuce, croutons, and Caesar dressing.</p>
+      <p><strong>$4.50</strong></p>
+      <button class="btn">Add to Order</button>
+    </div>
+
+    <div class="card">
+      <h3>🍝 Spaghetti Bolognese</h3>
+      <p>Rich tomato sauce with minced beef.</p>
+      <p><strong>$6.00</strong></p>
+      <button class="btn">Add to Order</button>
+    </div>
+
+    <div class="card">
+      <h3>☕ Cappuccino</h3>
+      <p>Perfectly balanced espresso with creamy milk foam.</p>
+      <p><strong>$3.20</strong></p>
+      <button class="btn">Add to Order</button>
+    </div>
+  </div>
+</section>
+{% endblock %}

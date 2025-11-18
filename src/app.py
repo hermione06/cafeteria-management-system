@@ -1,8 +1,9 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_migrate import Migrate
 from models import db, User
 from config import config
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -23,14 +24,6 @@ menu_items = [
     {"id": 2, "name": "Sandwich", "price": 5.00, "category": "Food"},
     {"id": 3, "name": "Salad", "price": 4.50, "category": "Food"}
 ]
-
-@app.route('/')
-def index():
-    """Homepage route"""
-    return jsonify({
-        "message": "Welcome to Cafeteria Management System",
-        "version": "1.0.0"
-    })
 
 @app.route('/health')
 def health():
@@ -172,12 +165,67 @@ def delete_user(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+### RENDERING HTML PAGES
+
+@app.route('/')
+def home_page():  # Change this line
+    """Render homepage (index.html)"""
+    return render_template('index.html')
+
+@app.route('/menu-page')
+def menu_page():
+    """Render menu.html"""
+    return render_template('menu.html')
+
+@app.route('/student-dashboard')
+def student_dashboard_page():
+    """Render student_dashboard.html"""
+    return render_template('student_dashboard.html')
+
+@app.route('/admin-dashboard')
+def admin_dashboard_page():
+    """Render admin_dashboard.html"""
+    return render_template('admin_dashboard.html')
+
+@app.route('/login')
+def login_page():
+    """Render login.html"""
+    return render_template('login.html')
+
+@app.route('/order')
+def oder_page():
+    """Render order.html"""
+    return render_template('order.html')
+
+@app.route('/registration', methods=['GET'])
+def registration_page():
+    return render_template('registration.html', current_year=datetime.now().year)
+
+@app.route('/send_verification_code', methods=['POST'])
+def send_verification_code():
+    email = request.form['email']
+    # TODO: send code via email logic here
+    return "Code sent to " + email
+
+@app.route('/verify_code', methods=['POST'])
+def verify_code():
+    code = request.form['code']
+    # TODO: real verification logic
+    return "Code verified"
+
+@app.route('/register_user', methods=['POST'])
+def register_user():
+    email = request.form['email']
+    password = request.form['password']
+    # TODO: Save user to DB here
+    return redirect(url_for('login_page'))
+
 
 if __name__ == '__main__':
     # Create tables if they don't exist (useful for Docker)
     with app.app_context():
         db.create_all()
         print("✅ Database tables created/verified")
-    
     # Run the application
     app.run(host='0.0.0.0', port=5000, debug=True)

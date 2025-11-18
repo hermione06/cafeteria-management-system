@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Cafeteria Management System{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <!-- ====== Navbar ====== -->
+  <nav class="navbar">
+    <div class="logo">
+      <a href="{{ url_for('home_page') }}"><strong>Cafeteria</strong></a>
+    </div>
+    <div class="nav-links">
+      <a href="{{ url_for('home_page') }}">Home</a>
+      <a href="#">Menu</a>
+      <a href="#">Orders</a>
+      <a href="#">Profile</a>
+    </div>
+  </nav>
+
+  <!-- ====== Main Content ====== -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ====== Footer ====== -->
+  <footer>
+    <p>&copy; {{ current_year if current_year else "2025" }} University Cafeteria | All rights reserved</p>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

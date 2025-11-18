@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Home - Cafeteria{% endblock %}
+
+{% block content %}
+<section style="text-align: center; padding: 5rem 1rem;">
+  <h1>Welcome to the University Cafeteria 🍫</h1>
+  <p>Delicious meals, quick service, and easy ordering — all in one place!</p>
+
+  <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.2rem;">
+    <a href="{{ url_for('menu_page') }}" class="btn">🍽️ View Menu</a>
+    <a href="{{ url_for('login_page') }}" class="btn">🔐 Login</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Cafeteria System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard admin">
+  <header class="navbar">
+    <h1>Admin Panel</h1>
+    <nav>
+      <a href="#" id="menu-management">Menu</a>
+      <a href="#" id="announcements">Announcements</a>
+      <a href="#" id="reports">Reports</a>
+      <a href="#" id="logout-btn">Logout</a>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+    <section class="announcements">
+      <h2>Manage Announcements</h2>
+      <form id="announcement-form">
+        <textarea id="announcement-text" placeholder="Write announcement..." required></textarea>
+        <button type="submit">Post</button>
+      </form>
+      <div id="announcements-list" class="list">
+        <!-- Announcements fetched from /announcements -->
+      </div>
+    </section>
+
+    <section class="menu-management">
+      <h2>Menu Management</h2>
+      <div id="menu-admin-list" class="grid">
+        <!-- Menu fetched from /menu -->
+      </div>
+      <button id="add-dish">Add Dish</button>
+    </section>
+
+    <section class="reports">
+      <h2>Reports</h2>
+      <button id="generate-report">Generate Report</button>
+      <div id="report-results">
+        <!-- Reports fetched from /reports -->
+      </div>
+    </section>
+  </main>
+
+  <script src="js/admin_dashboard.js"></script>
+</body>
+</html>

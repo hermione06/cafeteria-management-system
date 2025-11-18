@@ -1,0 +1,232 @@
+/* ====== Bounty Candy Bar Inspired Theme ====== */
+:root {
+  --bounty-blue: #0099cc;
+  --bounty-light: #cceeff;
+  --bounty-white: #ffffff;
+  --bounty-brown: #8b5e3c;
+  --bounty-sand: #f4e1c1;
+  --bounty-shadow: rgba(0, 0, 0, 0.15);
+  --radius: 12px;
+  --transition: 0.3s ease;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  background: linear-gradient(180deg, var(--bounty-light), var(--bounty-white));
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ====== Navbar ====== */
+.navbar {
+  background-color: var(--bounty-blue);
+  color: var(--bounty-white);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 3px 10px var(--bounty-shadow);
+  flex-wrap: wrap;
+}
+
+.navbar a {
+  color: var(--bounty-white);
+  text-decoration: none;
+  margin: 0 1rem;
+  transition: var(--transition);
+}
+
+.navbar a:hover {
+  color: var(--bounty-sand);
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ====== Buttons ====== */
+button,
+.btn {
+  background-color: var(--bounty-blue);
+  color: var(--bounty-white);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-block;
+}
+
+button:hover,
+.btn:hover {
+  background-color: var(--bounty-brown);
+}
+
+/* ====== Cards ====== */
+.card {
+  background-color: var(--bounty-white);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px var(--bounty-shadow);
+  padding: 1.5rem;
+  margin: 1rem;
+  transition: var(--transition);
+  flex: 1 1 280px;
+  max-width: 320px;
+  box-sizing: border-box;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+/* ====== Card Container ====== */
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* ====== Footer ====== */
+footer {
+  background-color: var(--bounty-blue);
+  color: var(--bounty-white);
+  text-align: center;
+  padding: 1rem;
+  margin-top: auto;
+  border-top: 3px solid var(--bounty-sand);
+}
+
+/* ====== Responsive Layouts ====== */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .navbar {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .nav-links {
+    margin-top: 0.5rem;
+  }
+
+  .card-container {
+    justify-content: center;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .navbar {
+    padding: 1rem;
+  }
+
+  .nav-links a {
+    margin: 0.5rem;
+    display: inline-block;
+  }
+
+  .card {
+    width: 90%;
+    margin: 1rem auto;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  p {
+    font-size: 0.95rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+  }
+}
+
+body.dashboard {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #fafafa;
+  color: #333;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #5c67f2;
+  color: white;
+  padding: 1em;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  margin: 0 0.8em;
+  font-weight: 500;
+}
+
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5em;
+  padding: 1.5em;
+}
+
+section {
+  background: white;
+  border-radius: 10px;
+  padding: 1em 1.2em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.grid {
+  display: grid;
+  gap: 1em;
+}
+
+.student .navbar {
+  background-color: #6a8eff;
+}
+
+.admin .navbar {
+  background-color: #ff6b6b;
+}
+
+.order-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5em;
+  padding: 1rem;
+}
+
+.menu-items {
+  flex: 2;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1em;
+}
+
+.menu-items .card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.8em;
+}
+
+.cart-summary {
+  flex: 1;
+  background: white;
+  padding: 1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px var(--bounty-shadow);
+  min-width: 250px;
+}
