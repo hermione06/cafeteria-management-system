@@ -1,6 +1,7 @@
 import os
 from flask import Flask, jsonify, request, render_template
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt
 from models import db, User
 from config import config
 from datetime import datetime
@@ -14,9 +15,13 @@ if config_name not in config:
     config_name = 'default'
 app.config.from_object(config[config_name])
 
-# Initialize database
+# Initialize extensions
 db.init_app(app)
 migrate = Migrate(app, db)
+jwt = JWTManager(app)
+
+# Register blueprints
+app.register_blueprint(auth_bp)
 
 # In-memory storage for menu items (will be replaced with database later)
 menu_items = [
@@ -51,17 +56,28 @@ def get_menu_by_category(category):
         return jsonify({"category": category, "items": filtered_items}), 200
     return jsonify({"message": f"No items found in category: {category}"}), 200
 
-# User Management Endpoints
+# User Management Endpoints (Protected)
 
 @app.route('/users', methods=['GET'])
+@jwt_required()
+@admin_required()
 def get_users():
-    """Get all users"""
+    """Get all users (Admin only)"""
     users = User.query.all()
     return jsonify({"users": [user.to_dict() for user in users]}), 200
 
 @app.route('/users/<int:user_id>', methods=['GET'])
+@jwt_required()
 def get_user(user_id):
-    """Get a specific user by ID"""
+    """Get a specific user by ID (Users can view their own, admins can view all)"""
+    from flask_jwt_extended import get_jwt_identity
+    current_user_id = get_jwt_identity()
+    claims = get_jwt()
+    
+    # Allow if admin or viewing own profile
+    if claims.get('role') != 'admin' and current_user_id != user_id:
+        return jsonify({"error": "Access denied"}), 403
+    
     user = db.session.get(User, user_id)
     if user:
         return jsonify(user.to_dict()), 200
@@ -77,9 +93,9 @@ def create_user():
         return jsonify({"error": "Username and email are required"}), 400
     
     # Validate role if provided
-    role = data.get('role', 'customer')
+    role = data.get('role', 'user')
     if not User.validate_role(role):
-        return jsonify({"error": "Invalid role. Must be: customer, staff, or admin"}), 400
+        return jsonify({"error": "Invalid role. Must be: user, or admin"}), 400
     
     # Check if username or email already exists
     if User.query.filter_by(username=data['username']).first():
@@ -93,8 +109,10 @@ def create_user():
         new_user = User(
             username=data['username'],
             email=data['email'],
-            role=role
+            role=role,
         )
+        new_user.set_password(data['password'])
+
         db.session.add(new_user)
         db.session.commit()
         
