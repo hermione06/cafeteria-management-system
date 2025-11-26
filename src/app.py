@@ -6,6 +6,8 @@ from models import db, User
 from config import config
 from auth import auth_bp
 from decorators import admin_required
+from routes.menu_routes import menu_bp
+
 
 app = Flask(__name__)
 
@@ -22,7 +24,9 @@ migrate = Migrate(app, db)
 jwt = JWTManager(app)
 
 # Register blueprints
-app.register_blueprint(auth_bp)
+app.register_blueprint(menu_bp)
+
+
 
 # In-memory storage for menu items (will be replaced with database later)
 menu_items = [
