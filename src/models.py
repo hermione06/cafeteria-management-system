@@ -82,3 +82,46 @@ class User(db.Model):
         """Validate user role"""
         valid_roles = ['user', 'admin']
         return role in valid_roles
+    
+
+# Menu Item and Category Models
+
+
+class Category(db.Model):
+    __tablename__ = "categories"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+
+    items = db.relationship("MenuItem", backref="category", lazy=True)
+
+    def to_dict(self):
+        return {"id": self.id, "name": self.name}
+
+
+class MenuItem(db.Model):
+    __tablename__ = "menu_items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.String(255), nullable=True)
+    price = db.Column(db.Float, nullable=False)
+    available = db.Column(db.Boolean, default=True)
+
+    picture_url = db.Column(db.String(255), nullable=True)
+
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
+
+    stock = db.Column(db.Integer, default=0)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "price": self.price,
+            "available": self.available,
+            "picture_url": self.picture_url,
+            "category": self.category.name if self.category else None,
+            "stock": self.stock,
+        }
