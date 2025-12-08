@@ -1,5 +1,7 @@
 import os
-from flask import Flask, jsonify, request, render_template
+from auth import auth_bp
+from decorators import admin_required
+from flask import Flask, jsonify, request, session, render_template, redirect, url_for, flash
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt
 from models import db, User
@@ -184,12 +186,49 @@ def delete_user(user_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
     
+
+@app.route('/announcements')
+def get_announcements():
+    """Return announcements as JSON"""
+    # TODO: Later fetch from database
+    announcements = []  # Empty list = no announcements
+    
+    # If no announcements, return a default message
+    if not announcements:
+        announcements = [
+            {
+                "message": "No announcements yet",
+                "date_posted": None  # No date
+            }
+        ]
+    
+    return jsonify({"announcements": announcements})
+    
+@app.route('/dashboard')
+def dashboard():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        flash("You are not logged in!", "error")
+        return render_template("error.html", message="You must be logged in to access the dashboard.")
+
+    role = session.get('role')
+
+    # Redirect based on role
+    if role == 'student':
+        return redirect(url_for('student_dashboard_page'))
+
+    elif role == 'admin':
+        return redirect(url_for('admin_dashboard_page'))
+
+    else:
+        return render_template("error.html", message="Unknown role. Access denied.")
+
 ### RENDERING HTML PAGES
 
 @app.route('/')
 def home_page():  # Change this line
-    """Render homepage (index.html)"""
-    return render_template('index.html')
+    """Render homepage (home.html)"""
+    return render_template('home.html')
 
 @app.route('/menu-page')
 def menu_page():
@@ -212,7 +251,7 @@ def login_page():
     return render_template('login.html')
 
 @app.route('/order')
-def oder_page():
+def order_page():
     """Render order.html"""
     return render_template('order.html')
 

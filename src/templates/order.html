@@ -1,26 +1,232 @@
 {% extends "base.html" %}
-{% block title %}Place Order | Cafeteria{% endblock %}
+
+{% block title %}Place Order - Cafeteria{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/order_style.css') }}">
+{% endblock %}
 
 {% block content %}
-<section class="order-page">
-  <h2 style="text-align: center;">🛒 Place Your Order</h2>
+<div class="order-container">
   
-  <div class="order-container">
-    <!-- Menu items -->
-    <section class="menu-items grid" id="menu-list">
-      <!-- Fetched dynamically via JS -->
-    </section>
-
-    <!-- Cart summary -->
-    <aside class="cart-summary">
-      <h3>My Cart</h3>
-      <div id="cart-items">
-        <p>Your cart is empty.</p>
-      </div>
-      <p><strong>Total:</strong> <span id="cart-total">0.00</span> AZN</p>
-      <button id="place-order" class="btn">Place Order</button>
-    </aside>
+  <!-- Menu Items Section -->
+  <div class="menu-items">
+    <h2>Select Items</h2>
+    <div id="menu-items-grid">
+      <p class="loading-message">Loading menu...</p>
+    </div>
   </div>
-</section>
-<script src="{{ url_for('static', filename='js/order.js') }}"></script>
+  
+  <!-- Cart Summary Section -->
+  <div class="cart-summary">
+    <h3>Your Cart</h3>
+    
+    <div id="cart-items">
+      <p class="empty-message">Your cart is empty</p>
+    </div>
+    
+    <hr class="cart-divider-thick">
+    
+    <div class="cart-total-row">
+      <strong>Total:</strong>
+      <strong id="cart-total">$0.00</strong>
+    </div>
+    
+    <button class="btn" onclick="checkout()" id="checkout-btn" disabled>
+      Place Order
+    </button>
+    
+    <button class="btn clear-cart-btn" onclick="clearCart()">
+      Clear Cart
+    </button>
+  </div>
+  
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let menuDishes = [];
+  let cart = [];
+  
+  // Load menu items from backend API
+  async function loadMenu() {
+    try {
+      const response = await fetch('/menu');
+      const data = await response.json();
+      
+      // Filter only available dishes
+      menuDishes = data.dishes.filter(d => d.is_available) || [];
+      renderMenuItems();
+      
+      // Load cart from sessionStorage if exists
+      const savedCart = sessionStorage.getItem('cart');
+      if (savedCart) {
+        cart = JSON.parse(savedCart);
+        updateCart();
+      }
+    } catch (error) {
+      console.error('Error loading menu:', error);
+      document.getElementById('menu-items-grid').innerHTML = 
+        '<p class="empty-message">Unable to load menu items.</p>';
+    }
+  }
+  
+  // Render menu items as cards
+  function renderMenuItems() {
+    const grid = document.getElementById('menu-items-grid');
+    
+    if (menuDishes.length === 0) {
+      grid.innerHTML = '<p class="empty-message">No items available.</p>';
+      return;
+    }
+    
+    grid.innerHTML = menuDishes.map(dish => `
+      <div class="card">
+        <img src="${dish.picture_link || '/static/images/placeholder.jpg'}" 
+             alt="${dish.name}">
+        
+        <h4>${dish.name}</h4>
+        <p class="price">$${dish.price.toFixed(2)}</p>
+        
+        <button class="btn" onclick="addToCart(${dish.dish_id})">
+          Add to Cart
+        </button>
+      </div>
+    `).join('');
+  }
+  
+  // Add item to cart
+  function addToCart(dishId) {
+    const dish = menuDishes.find(d => d.dish_id === dishId);
+    if (!dish) return;
+    
+    const existingItem = cart.find(item => item.dish_id === dishId);
+    if (existingItem) {
+      existingItem.count++;
+    } else {
+      cart.push({ 
+        dish_id: dish.dish_id,
+        name: dish.name,
+        price: dish.price,
+        count: 1 
+      });
+    }
+    
+    updateCart();
+  }
+  
+  // Remove item from cart
+  function removeFromCart(dishId) {
+    cart = cart.filter(item => item.dish_id !== dishId);
+    updateCart();
+  }
+  
+  // Update item quantity
+  function updateQuantity(dishId, change) {
+    const item = cart.find(i => i.dish_id === dishId);
+    if (!item) return;
+    
+    item.count += change;
+    if (item.count <= 0) {
+      removeFromCart(dishId);
+    } else {
+      updateCart();
+    }
+  }
+  
+  // Update cart display and totals
+  function updateCart() {
+    // Save to sessionStorage
+    sessionStorage.setItem('cart', JSON.stringify(cart));
+    
+    const cartItemsDiv = document.getElementById('cart-items');
+    
+    if (cart.length === 0) {
+      cartItemsDiv.innerHTML = '<p class="empty-message">Your cart is empty</p>';
+      document.getElementById('checkout-btn').disabled = true;
+      document.getElementById('cart-total').textContent = '$0.00';
+      return;
+    }
+    
+    // Render cart items
+    cartItemsDiv.innerHTML = cart.map(item => `
+      <div class="cart-item">
+        <div class="cart-item-header">
+          <strong>${item.name}</strong>
+          <button onclick="removeFromCart(${item.dish_id})" class="cart-item-remove">&times;</button>
+        </div>
+        
+        <div class="cart-item-footer">
+          <div class="quantity-controls">
+            <button onclick="updateQuantity(${item.dish_id}, -1)" class="btn">-</button>
+            <span>${item.count}</span>
+            <button onclick="updateQuantity(${item.dish_id}, 1)" class="btn">+</button>
+          </div>
+          <strong class="cart-item-total">$${(item.price * item.count).toFixed(2)}</strong>
+        </div>
+      </div>
+    `).join('');
+    
+    // Calculate total
+    const total = cart.reduce((sum, item) => sum + (item.price * item.count), 0);
+    
+    document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('checkout-btn').disabled = false;
+  }
+  
+  // Clear cart
+  function clearCart() {
+    if (confirm('Are you sure you want to clear your cart?')) {
+      cart = [];
+      updateCart();
+    }
+  }
+  
+  // Checkout - Place order via API
+  async function checkout() {
+    if (cart.length === 0) return;
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * item.count), 0);
+    
+    // Prepare order data matching OrderItem schema
+    const orderData = {
+      items: cart.map(item => ({
+        dish_id: item.dish_id,
+        count: item.count
+      })),
+      total_price: parseFloat(total.toFixed(2))
+    };
+    
+    try {
+      const response = await fetch('/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        alert('Order placed successfully!');
+        cart = [];
+        sessionStorage.removeItem('cart');
+        updateCart();
+        
+        // Redirect to order details page
+        if (result.order_id) {
+          window.location.href = `/order/${result.order_id}`;
+        }
+      } else {
+        alert('Error placing order: ' + (result.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('Unable to place order. Please try again.');
+    }
+  }
+  
+  // Load menu on page load
+  document.addEventListener('DOMContentLoaded', loadMenu);
+</script>
 {% endblock %}

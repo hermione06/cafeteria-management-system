@@ -11,14 +11,12 @@
 <body>
   <!-- ====== Navbar ====== -->
   <nav class="navbar">
-    <div class="logo">
-      <a href="{{ url_for('home_page') }}"><strong>Cafeteria</strong></a>
-    </div>
     <div class="nav-links">
       <a href="{{ url_for('home_page') }}">Home</a>
-      <a href="#">Menu</a>
-      <a href="#">Orders</a>
-      <a href="#">Profile</a>
+      <a href="{{ url_for('menu_page') }}">Menu</a>
+      <a href="{{ url_for('order_page') }}">Orders</a>
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('login_page') }}">Login</a>
     </div>
   </nav>
 
@@ -29,7 +27,7 @@
 
   <!-- ====== Footer ====== -->
   <footer>
-    <p>&copy; {{ current_year if current_year else "2025" }} University Cafeteria | All rights reserved</p>
+    <p>&copy; 2025 University Cafeteria | All rights reserved</p>
   </footer>
 
   {% block scripts %}{% endblock %}

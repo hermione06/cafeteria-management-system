@@ -1,47 +1,157 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Dashboard | Cafeteria System</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body class="dashboard student">
-  <header class="navbar">
-    <h1>Welcome, Student!</h1>
-    <nav>
-      <a href="menu.html">Menu</a>
-      <a href="#" id="orders-link">My Orders</a>
-      <a href="#" id="logout-btn">Logout</a>
-    </nav>
-  </header>
+{% extends "base.html" %}
 
-  <main class="dashboard-container">
-    <section class="profile-card">
-      <h2>My Profile</h2>
-      <div id="student-info">
-        <p><strong>Name:</strong> Jane Doe</p>
-        <p><strong>Email:</strong> jane@student.ufaz.edu.az</p>
-        <p><strong>Student ID:</strong> #12345</p>
+{% block title %}Student Dashboard{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/student_dashboard.css') }}">
+<style>
+  .order-details-block {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f5f5f5;
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+</style>
+{% endblock %}
+
+{% block head %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('student-dashboard');
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container student">
+
+  <!-- Welcome Section -->
+  <section class="welcome-section">
+    <h2>Welcome, <span id="student-name">Student</span>!</h2>
+    <p>Manage your orders and view your cafeteria activity.</p>
+  </section>
+
+  <!-- Quick Stats -->
+  <section>
+    <h3>Quick Stats</h3>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h4 id="total-orders">0</h4>
+        <p>Total Orders</p>
       </div>
-    </section>
-
-    <section class="orders-section">
-      <h2>My Orders</h2>
-      <div id="orders-list" class="grid">
-        <!-- Orders fetched dynamically from /order -->
+      <div class="stat-card">
+        <h4 id="pending-orders">0</h4>
+        <p>Pending Orders</p>
       </div>
-    </section>
-
-    <section class="menu-preview">
-      <h2>Today’s Menu</h2>
-      <div id="menu-preview-list" class="grid">
-        <!-- Menu fetched from /menu -->
+      <div class="stat-card">
+        <h4 id="total-spent">$0.00</h4>
+        <p>Total Spent</p>
       </div>
-      <button id="view-full-menu">View Full Menu</button>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <script src="js/student_dashboard.js"></script>
-</body>
-</html>
+  <!-- Recent Orders -->
+  <section>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>Recent Orders</h3>
+      <button class="btn" onclick="toggleAllOrders()">View All Orders</button>
+    </div>
+
+    <div id="orders-grid" class="orders-grid"></div>
+  </section>
+
+  <!-- Collapsible Order Details Block -->
+  <div id="order-details-block" class="order-details-block" style="display:none;">
+    <h3 id="order-details-title"></h3>
+    <div id="order-items-grid" class="items-grid"></div>
+    <button class="btn" onclick="hideOrderDetails()">Close Details</button>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allOrders = [];
+let showingAll = false;
+
+// Load dashboard
+async function loadDashboard() {
+  try {
+    // Fetch profile
+    const profileRes = await fetch('/profile');
+    const profile = await profileRes.json();
+    document.getElementById('student-name').textContent = profile.name;
+
+    // Fetch orders
+    const ordersRes = await fetch('/orders');
+    const data = await ordersRes.json();
+    allOrders = data.orders || [];
+
+    // Stats
+    document.getElementById('total-orders').textContent = allOrders.length;
+    document.getElementById('pending-orders').textContent =
+      allOrders.filter(o => o.status === 'pending').length;
+
+    document.getElementById('total-spent').textContent =
+      "$" + allOrders.reduce((s, o) => s + o.total_price, 0).toFixed(2);
+
+    renderOrderGrid();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// Render orders
+function renderOrderGrid() {
+  const grid = document.getElementById("orders-grid");
+  const visibleOrders = showingAll ? allOrders : allOrders.slice(0, 5);
+
+  grid.innerHTML = visibleOrders.map(order => `
+    <button class="order-btn" onclick="openOrderDetails(${order.order_id})">
+      ${new Date(order.date_created).toLocaleDateString()}
+    </button>
+  `).join('');
+}
+
+function toggleAllOrders() {
+  showingAll = !showingAll;
+  renderOrderGrid();
+}
+
+// Open collapsible order details block
+async function openOrderDetails(orderId) {
+  const res = await fetch(`/order/${orderId}/details`);
+  const order = await res.json();
+
+  // Set title
+  const date = new Date(order.date_created).toLocaleDateString();
+  document.getElementById("order-details-title").textContent =
+    `Order #${order.order_id} from ${date}`;
+
+  // Items grid
+  const grid = document.getElementById("order-items-grid");
+  grid.innerHTML = order.items.map(item => `
+    <div><strong>${item.name}</strong></div>
+    <div>x${item.quantity}</div>
+  `).join('');
+
+  // Show block
+  document.getElementById("order-details-block").style.display = "block";
+}
+
+// Hide block
+function hideOrderDetails() {
+  document.getElementById("order-details-block").style.display = "none";
+}
+
+document.addEventListener("DOMContentLoaded", loadDashboard);
+</script>
+{% endblock %}

@@ -1,6 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_bcrypt import generate_password_hash, check_password_hash
+import secrets
+from sqlalchemy import func
+from datetime import datetime, timedelta, timezone
+import secrets
 
 db = SQLAlchemy()
 
@@ -11,12 +15,17 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(256), nullable=False)  # Added field
-    role = db.Column(db.String(20), nullable=False, default='customer')
+    password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='user')  # user, admin
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-
+    is_verified = db.Column(db.Boolean, default=False, nullable=False)
+    verification_token = db.Column(db.String(100), unique=True, nullable=True)
+    reset_token = db.Column(db.String(100), unique=True, nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)    
+    last_login = db.Column(db.DateTime, nullable=True)
+    
     def __repr__(self):
         return f'<User {self.username}>'
     
@@ -58,29 +67,18 @@ class User(db.Model):
             'is_active': self.is_active,
             'is_verified': self.is_verified,
             'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat()
+            'updated_at': self.updated_at.isoformat(),
+            'last_login': self.last_login.isoformat() if self.last_login else None
         }
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-    
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        
+        if include_sensitive:
+            data['verification_token'] = self.verification_token
+            data['reset_token'] = self.reset_token
+        
+        return data
     
     @staticmethod
     def validate_role(role):
         """Validate user role"""
-        valid_roles = ['customer', 'staff', 'admin']
+        valid_roles = ['user', 'admin']
         return role in valid_roles
-
-class VerificationCode(db.Model):
-    """Temporary table for email verification codes"""
-    __tablename__ = 'verification_codes'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), nullable=False)
-    code = db.Column(db.String(6), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    attempts = db.Column(db.Integer, default=0)
-
-    def is_expired(self):
-        return datetime.utcnow() > self.created_at + timedelta(hours=1)
