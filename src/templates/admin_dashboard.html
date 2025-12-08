@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block head %}
+<style>
+  body { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .admin .navbar { background-color: #ff6b6b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container admin">
+  
+  <!-- Welcome Section -->
+  <section>
+    <h2 style="color: #ff6b6b;">Admin Dashboard</h2>
+    <p style="color: #666;">Manage cafeteria operations, menus, and reports.</p>
+  </section>
+  
+  <!-- Statistics Overview -->
+  <section>
+    <h3 style="color: #ff6b6b; margin-bottom: 1rem;">Today's Overview</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+      <div style="background: #ffe5e5; padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; color: #ff6b6b;" id="stat-orders">0</h4>
+        <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.9rem;">Orders Today</p>
+      </div>
+      <div style="background: #ffe5e5; padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; color: #ff6b6b;" id="stat-revenue">$0.00</h4>
+        <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.9rem;">Revenue Today</p>
+      </div>
+      <div style="background: #ffe5e5; padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; color: #ff6b6b;" id="stat-dishes">0</h4>
+        <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.9rem;">Active Dishes</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Menu Management -->
+  <section>
+    <h3 style="color: #ff6b6b; margin-bottom: 1rem;">Menu Management</h3>
+    <button class="btn" onclick="showAddDishForm()" style="background-color: #ff6b6b; margin-bottom: 1rem;">+ Add New Dish</button>
+    
+    <!-- Add Dish Form (hidden by default) -->
+    <div id="add-dish-form" style="display: none; background: #ffe5e5; padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+      <h4 style="margin-top: 0;">Add New Dish</h4>
+      <input type="text" id="dish-name" placeholder="Dish Name" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+      <textarea id="dish-description" placeholder="Description" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #ccc; border-radius: 4px;" rows="3"></textarea>
+      <input type="number" id="dish-price" placeholder="Price" step="0.01" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+      <input type="text" id="dish-image" placeholder="Image URL (optional)" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn" onclick="submitNewDish()" style="background-color: #28a745;">Save Dish</button>
+        <button class="btn" onclick="hideAddDishForm()" style="background-color: #6c757d;">Cancel</button>
+      </div>
+    </div>
+    
+    <div id="menu-list">
+      <p>Loading menu items...</p>
+    </div>
+  </section>
+  
+  <!-- Announcements -->
+  <section>
+    <h3 style="color: #ff6b6b; margin-bottom: 1rem;">Announcements</h3>
+    <button class="btn" onclick="showAddAnnouncementForm()" style="background-color: #ff6b6b; margin-bottom: 1rem;">+ Post Announcement</button>
+    
+    <!-- Add Announcement Form -->
+    <div id="add-announcement-form" style="display: none; background: #ffe5e5; padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+      <h4 style="margin-top: 0;">New Announcement</h4>
+      <textarea id="announcement-message" placeholder="Announcement message..." style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #ccc; border-radius: 4px;" rows="4"></textarea>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn" onclick="submitAnnouncement()" style="background-color: #28a745;">Post</button>
+        <button class="btn" onclick="hideAddAnnouncementForm()" style="background-color: #6c757d;">Cancel</button>
+      </div>
+    </div>
+    
+    <div id="announcements-list">
+      <p>Loading announcements...</p>
+    </div>
+  </section>
+  
+  <!-- Reports -->
+  <section>
+    <h3 style="color: #ff6b6b; margin-bottom: 1rem;">Reports</h3>
+    <button class="btn" onclick="generateReport()" style="background-color: #ff6b6b;">Generate Sales Report</button>
+    <div id="reports-container" style="margin-top: 1rem;">
+      <p style="color: #888;">Click to generate a report.</p>
+    </div>
+  </section>
+  
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Load dashboard data
+  async function loadDashboard() {
+    await Promise.all([
+      loadStats(),
+      loadMenu(),
+      loadAnnouncements()
+    ]);
+  }
+  
+  // Load statistics
+  async function loadStats() {
+    try {
+      const response = await fetch('/reports');
+      const data = await response.json();
+      
+      document.getElementById('stat-orders').textContent = data.orders_today || 0;
+      document.getElementById('stat-revenue').textContent = `$${(data.revenue_today || 0).toFixed(2)}`;
+      document.getElementById('stat-dishes').textContent = data.active_dishes || 0;
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  }
+  
+  // Load menu items
+  async function loadMenu() {
+    try {
+      const response = await fetch('/menu');
+      const data = await response.json();
+      const dishes = data.dishes || [];
+      
+      const menuList = document.getElementById('menu-list');
+      
+      if (dishes.length === 0) {
+        menuList.innerHTML = '<p style="color: #888;">No dishes in menu.</p>';
+        return;
+      }
+      
+      menuList.innerHTML = dishes.map(dish => `
+        <div style="background: var(--bounty-white); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="flex: 1; min-width: 200px;">
+            <h4 style="margin: 0 0 0.3rem 0; color: var(--bounty-blue);">${dish.name}</h4>
+            <p style="margin: 0; font-size: 0.9rem; color: #666;">${dish.description}</p>
+            <p style="margin: 0.3rem 0 0 0; font-weight: bold; color: var(--bounty-brown);">$${dish.price.toFixed(2)}</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <span style="font-size: 0.85rem; padding: 0.3rem 0.6rem; border-radius: 4px; background: ${dish.is_available ? '#d4edda' : '#f8d7da'}; color: ${dish.is_available ? '#155724' : '#721c24'};">
+              ${dish.is_available ? 'Available' : 'Unavailable'}
+            </span>
+            <button class="btn" onclick="toggleDishAvailability(${dish.dish_id}, ${dish.is_available})" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+              ${dish.is_available ? 'Disable' : 'Enable'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    } catch (error) {
+      console.error('Error loading menu:', error);
+      document.getElementById('menu-list').innerHTML = '<p style="color: #888;">Unable to load menu.</p>';
+    }
+  }
+  
+  // Toggle dish availability
+  async function toggleDishAvailability(dishId, currentStatus) {
+    try {
+      const response = await fetch(`/menu/${dishId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_available: !currentStatus })
+      });
+      
+      if (response.ok) {
+        loadMenu();
+      }
+    } catch (error) {
+      console.error('Error toggling dish:', error);
+    }
+  }
+  
+  // Show/hide add dish form
+  function showAddDishForm() {
+    document.getElementById('add-dish-form').style.display = 'block';
+  }
+  
+  function hideAddDishForm() {
+    document.getElementById('add-dish-form').style.display = 'none';
+  }
+  
+  // Submit new dish
+  async function submitNewDish() {
+    const name = document.getElementById('dish-name').value.trim();
+    const description = document.getElementById('dish-description').value.trim();
+    const price = parseFloat(document.getElementById('dish-price').value);
+    const pictureLink = document.getElementById('dish-image').value.trim();
+    
+    if (!name || !description || !price) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          description,
+          price,
+          picture_link: pictureLink || null,
+          is_available: true
+        })
+      });
+      
+      if (response.ok) {
+        alert('Dish added successfully!');
+        hideAddDishForm();
+        document.getElementById('dish-name').value = '';
+        document.getElementById('dish-description').value = '';
+        document.getElementById('dish-price').value = '';
+        document.getElementById('dish-image').value = '';
+        loadMenu();
+      }
+    } catch (error) {
+      console.error('Error adding dish:', error);
+      alert('Failed to add dish');
+    }
+  }
+  
+  // Load announcements
+  async function loadAnnouncements() {
+    try {
+      const response = await fetch('/announcements');
+      const data = await response.json();
+      const announcements = data.announcements || [];
+      
+      const list = document.getElementById('announcements-list');
+      
+      if (announcements.length === 0) {
+        list.innerHTML = '<p style="color: #888;">No announcements posted.</p>';
+        return;
+      }
+      
+      list.innerHTML = announcements.slice(0, 5).map(ann => `
+        <div style="background: var(--bounty-white); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem; border-left: 4px solid #ff6b6b;">
+          <p style="margin: 0 0 0.5rem 0;">${ann.message}</p>
+          <small style="color: #888;">${new Date(ann.date_posted).toLocaleString()}</small>
+        </div>
+      `).join('');
+    } catch (error) {
+      console.error('Error loading announcements:', error);
+    }
+  }
+  
+  // Show/hide announcement form
+  function showAddAnnouncementForm() {
+    document.getElementById('add-announcement-form').style.display = 'block';
+  }
+  
+  function hideAddAnnouncementForm() {
+    document.getElementById('add-announcement-form').style.display = 'none';
+  }
+  
+  // Submit announcement
+  async function submitAnnouncement() {
+    const message = document.getElementById('announcement-message').value.trim();
+    
+    if (!message) {
+      alert('Please enter an announcement message');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      });
+      
+      if (response.ok) {
+        alert('Announcement posted!');
+        hideAddAnnouncementForm();
+        document.getElementById('announcement-message').value = '';
+        loadAnnouncements();
+      }
+    } catch (error) {
+      console.error('Error posting announcement:', error);
+      alert('Failed to post announcement');
+    }
+  }
+  
+  // Generate report
+  async function generateReport() {
+    try {
+      const response = await fetch('/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const data = await response.json();
+      
+      document.getElementById('reports-container').innerHTML = `
+        <div style="background: var(--bounty-white); padding: 1rem; border-radius: var(--radius);">
+          <h4 style="margin-top: 0; color: #ff6b6b;">Sales Report Generated</h4>
+          <p><strong>Total Orders:</strong> ${data.total_orders || 0}</p>
+          <p><strong>Total Revenue:</strong> $${(data.total_sales || 0).toFixed(2)}</p>
+          <p><strong>Average Order Value:</strong> $${(data.avg_order_value || 0).toFixed(2)}</p>
+          <small style="color: #888;">Generated: ${new Date().toLocaleString()}</small>
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert('Failed to generate report');
+    }
+  }
+  
+  // Load dashboard on page load
+  document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+{% endblock %}
