@@ -1,7 +1,7 @@
 import pytest
 from app import app, db
 from models import User, MenuItem, Order, OrderItem
-from services.order_handler import OrderHandler  # adjust path if different
+from order_handler import OrderHandler  # adjust path if different
 
 
 # -------------------------------------------------------------
