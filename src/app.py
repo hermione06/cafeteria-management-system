@@ -6,7 +6,7 @@ from models import db, User
 from config import config
 from auth import auth_bp
 from decorators import admin_required
-from routes.menu_routes import menu_bp
+from menu_routes import menu_bp
 
 
 app = Flask(__name__)
