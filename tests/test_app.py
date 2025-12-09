@@ -36,8 +36,7 @@ def test_index_route(client):
     """Test the homepage route"""
     response = client.get('/')
     assert response.status_code == 200
-    assert b'Welcome to Cafeteria Management System' in response.data
-
+    assert b'Welcome to UFAZ Cafeteria' in response.data
 def test_health_check(client):
     """Test the health check endpoint"""
     response = client.get('/health')
