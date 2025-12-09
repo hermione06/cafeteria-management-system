@@ -33,7 +33,7 @@ class ProductionConfig(Config):
     # For Docker/production, use /app/instance which we created in Dockerfile
     # Fall back to environment variable first, then to a simple path
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:////app/instance/cafeteria.db'
+        f'sqlite:///{basedir}/instance/cafeteria.db'
 
 # Configuration dictionary
 config = {

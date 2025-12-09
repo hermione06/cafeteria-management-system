@@ -1,13 +1,16 @@
 import os
-from flask import Flask, jsonify, request
+from auth import auth_bp
+from decorators import admin_required
+from flask import Flask, jsonify, request, session, render_template, redirect, url_for, flash
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt
 from models import db, User
 from config import config
+from config import config
 from auth import auth_bp
 from decorators import admin_required
 from menu_routes import menu_bp
-
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -25,49 +28,12 @@ jwt = JWTManager(app)
 
 # Register blueprints
 app.register_blueprint(menu_bp)
-
-
-
-# In-memory storage for menu items (will be replaced with database later)
-menu_items = [
-    {"id": 1, "name": "Coffee", "price": 2.50, "category": "Beverages"},
-    {"id": 2, "name": "Sandwich", "price": 5.00, "category": "Food"},
-    {"id": 3, "name": "Salad", "price": 4.50, "category": "Food"}
-]
-
-@app.route('/')
-def index():
-    """Homepage route"""
-    return jsonify({
-        "message": "Welcome to Cafeteria Management System",
-        "version": "1.0.0"
-    })
+app.register_blueprint(auth_bp)
 
 @app.route('/health')
 def health():
     """Health check endpoint"""
     return jsonify({"status": "healthy"}), 200
-
-@app.route('/menu', methods=['GET'])
-def get_menu():
-    """Get all menu items"""
-    return jsonify({"menu": menu_items}), 200
-
-@app.route('/menu/<int:item_id>', methods=['GET'])
-def get_menu_item(item_id):
-    """Get a specific menu item by ID"""
-    item = next((item for item in menu_items if item["id"] == item_id), None)
-    if item:
-        return jsonify(item), 200
-    return jsonify({"error": "Item not found"}), 404
-
-@app.route('/menu/category/<category>', methods=['GET'])
-def get_menu_by_category(category):
-    """Get menu items filtered by category"""
-    filtered_items = [item for item in menu_items if item["category"].lower() == category.lower()]
-    if filtered_items:
-        return jsonify({"category": category, "items": filtered_items}), 200
-    return jsonify({"message": f"No items found in category: {category}"}), 200
 
 # User Management Endpoints (Protected)
 
@@ -196,12 +162,104 @@ def delete_user(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/announcements')
+def get_announcements():
+    """Return announcements as JSON"""
+    # TODO: Later fetch from database
+    announcements = []  # Empty list = no announcements
+    
+    # If no announcements, return a default message
+    if not announcements:
+        announcements = [
+            {
+                "message": "No announcements yet",
+                "date_posted": None  # No date
+            }
+        ]
+    
+    return jsonify({"announcements": announcements})
+    
+@app.route('/dashboard')
+def dashboard():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        flash("You are not logged in!", "error")
+        return render_template("error.html", message="You must be logged in to access the dashboard.")
+
+    role = session.get('role')
+
+    # Redirect based on role
+    if role == 'student':
+        return redirect(url_for('student_dashboard_page'))
+
+    elif role == 'admin':
+        return redirect(url_for('admin_dashboard_page'))
+
+    else:
+        return render_template("error.html", message="Unknown role. Access denied.")
+
+### RENDERING HTML PAGES
+
+@app.route('/')
+def home_page():  # Change this line
+    """Render homepage (home.html)"""
+    return render_template('home.html')
+
+@app.route('/menu-page')
+def menu_page():
+    """Render menu.html"""
+    return render_template('menu.html')
+
+@app.route('/student-dashboard')
+def student_dashboard_page():
+    """Render student_dashboard.html"""
+    return render_template('student_dashboard.html')
+
+@app.route('/admin-dashboard')
+def admin_dashboard_page():
+    """Render admin_dashboard.html"""
+    return render_template('admin_dashboard.html')
+
+@app.route('/login')
+def login_page():
+    """Render login.html"""
+    return render_template('login.html')
+
+@app.route('/order')
+def order_page():
+    """Render order.html"""
+    return render_template('order.html')
+
+@app.route('/registration', methods=['GET'])
+def registration_page():
+    return render_template('registration.html', current_year=datetime.now().year)
+
+@app.route('/send_verification_code', methods=['POST'])
+def send_verification_code():
+    email = request.form['email']
+    # TODO: send code via email logic here
+    return "Code sent to " + email
+
+@app.route('/verify_code', methods=['POST'])
+def verify_code():
+    code = request.form['code']
+    # TODO: real verification logic
+    return "Code verified"
+
+@app.route('/register_user', methods=['POST'])
+def register_user():
+    email = request.form['email']
+    password = request.form['password']
+    # TODO: Save user to DB here
+    return redirect(url_for('login_page'))
+
 
 if __name__ == '__main__':
     # Create tables if they don't exist (useful for Docker)
     with app.app_context():
         db.create_all()
         print("✅ Database tables created/verified")
-    
     # Run the application
     app.run(host='0.0.0.0', port=5000, debug=True)
