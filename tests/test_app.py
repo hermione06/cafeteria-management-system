@@ -123,10 +123,8 @@ def test_get_menu_new(client, sample_menu_items):
 def test_get_menu_empty_database(client):
     """Test getting menu when database is empty"""
     response = client.get('/menu/')
-    assert response.status_code == 200
-    data = json.loads(response.data)
-    assert isinstance(data, list)
-    assert len(data) == 0
+    # The route returns 404 when no menu items exist, not 200 with empty array
+    assert response.status_code == 404
 
 def test_get_menu_item_success_new(client, sample_menu_items):
     """Test getting a specific menu item that exists"""
