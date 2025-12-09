@@ -1,53 +1,68 @@
 from flask import Blueprint, request, jsonify
 from models import db, MenuItem, Category
-import os
 from werkzeug.utils import secure_filename
+import os
 
 menu_bp = Blueprint("menu", __name__, url_prefix="/menu")
 
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 ALLOWED_EXT = {"png", "jpg", "jpeg"}
 
 
-def allowed_file(filename):
+def allowed(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
 
 
-# getting all the menu items
+# ============================
+# GET ALL MENU ITEMS
+# ============================
 
 @menu_bp.route("/", methods=["GET"])
 def get_menu():
     items = MenuItem.query.all()
+    if not items:
+        return jsonify({"error": "No menu items found"}), 404
     return jsonify([item.to_dict() for item in items]), 200
 
 
-# creating menu item (ADMIN)
+# ============================
+# GET SINGLE ITEM
+# ============================
+
+@menu_bp.route("/<int:item_id>", methods=["GET"])
+def get_menu_item(item_id):
+    item = MenuItem.query.get(item_id)
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+    return jsonify(item.to_dict()), 200
+
+
+# ============================
+# CREATE ITEM
+# ============================
 
 @menu_bp.route("/", methods=["POST"])
 def create_item():
-    data = request.form
+    data = request.form if request.form else request.get_json(silent=True) or {}
 
     name = data.get("name")
     price = data.get("price")
-    category_name = data.get("category")
+    category = data.get("category")
 
-    if not name or not price or not category_name:
+    if not name or not price or not category:
         return jsonify({"error": "Missing required fields"}), 400
 
-    # Get or create category
-    category = Category.query.filter_by(name=category_name).first()
-    if not category:
-        category = Category(name=category_name)
-        db.session.add(category)
-        db.session.commit()
+    try:
+        price = float(price)
+    except:
+        return jsonify({"error": "Invalid price"}), 400
 
-    # Handle image upload
+    # image
     picture_url = None
     if "image" in request.files:
         file = request.files["image"]
-        if allowed_file(file.filename):
+        if allowed(file.filename):
             filename = secure_filename(file.filename)
             path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(path)
@@ -58,10 +73,10 @@ def create_item():
     item = MenuItem(
         name=name,
         description=data.get("description"),
-        price=float(price),
-        picture_url=picture_url,
-        category_id=category.id,
+        price=price,
         stock=int(data.get("stock", 0)),
+        picture_url=picture_url,
+        category=category,
     )
 
     db.session.add(item)
@@ -70,7 +85,9 @@ def create_item():
     return jsonify(item.to_dict()), 201
 
 
-# updating item
+# ============================
+# UPDATE ITEM
+# ============================
 
 @menu_bp.route("/<int:item_id>", methods=["PUT"])
 def update_item(item_id):
@@ -78,66 +95,68 @@ def update_item(item_id):
     if not item:
         return jsonify({"error": "Item not found"}), 404
 
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
 
     if "name" in data:
         item.name = data["name"]
-
     if "description" in data:
         item.description = data["description"]
-
     if "price" in data:
-        item.price = float(data["price"])
-
+        try:
+            item.price = float(data["price"])
+        except:
+            return jsonify({"error": "Invalid price"}), 400
     if "available" in data:
         item.available = bool(data["available"])
-
     if "stock" in data:
-        item.stock = int(data["stock"])
-
+        try:
+            item.stock = int(data["stock"])
+        except:
+            return jsonify({"error": "Invalid stock"}), 400
     if "category" in data:
         cat = Category.query.filter_by(name=data["category"]).first()
         if not cat:
             cat = Category(name=data["category"])
             db.session.add(cat)
-            db.session.commit()
-
+            db.session.flush()
         item.category_id = cat.id
 
     db.session.commit()
     return jsonify(item.to_dict()), 200
 
 
-# deleting item
+# ============================
+# DELETE ITEM
+# ============================
 
 @menu_bp.route("/<int:item_id>", methods=["DELETE"])
 def delete_item(item_id):
     item = MenuItem.query.get(item_id)
     if not item:
         return jsonify({"error": "Item not found"}), 404
-
     db.session.delete(item)
     db.session.commit()
     return jsonify({"message": "Item deleted"}), 200
 
 
-
-# Searching items by name
+# ============================
+# SEARCH
+# ============================
 
 @menu_bp.route("/search", methods=["GET"])
 def search_items():
-    q = request.args.get("q", "").lower()
+    q = request.args.get("q", "").strip()
     results = MenuItem.query.filter(MenuItem.name.ilike(f"%{q}%")).all()
-    return jsonify([i.to_dict() for i in results]), 200
+    return jsonify([item.to_dict() for item in results]), 200
 
 
-
-# Filtering items by category
+# ============================
+# FILTER BY CATEGORY
+# ============================
 
 @menu_bp.route("/category/<category>", methods=["GET"])
 def filter_by_category(category):
     cat = Category.query.filter_by(name=category).first()
     if not cat:
         return jsonify([]), 200
-
-    return jsonify([i.to_dict() for i in cat.items]), 200
+    return jsonify([item.to_dict() for item in cat.items]), 200
