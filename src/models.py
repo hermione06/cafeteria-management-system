@@ -76,7 +76,7 @@ class User(db.Model):
 
     @staticmethod
     def validate_role(role):
-    return role in ['user', 'admin']
+        return role in ['user', 'admin']
 
 
 # ============================
