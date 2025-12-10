@@ -76,7 +76,7 @@ class User(db.Model):
 
     @staticmethod
     def validate_role(role):
-        return role in ['user', 'admin']
+    return role in ['user', 'admin']
 
 
 # ============================
@@ -135,3 +135,86 @@ class MenuItem(db.Model):
             "category": self.category.name if self.category else None,
             "stock": self.stock,
         }
+        """Validate user role"""
+        valid_roles = ['user', 'admin']
+        return role in valid_roles
+    
+class Order(db.Model):
+    """Order model for cafeteria orders"""
+    __tablename__ = 'orders'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    user = db.relationship('User', backref=db.backref('orders', lazy=True))
+
+    status = db.Column(db.String(20), nullable=False, default='pending', index=True)
+    is_paid = db.Column(db.Boolean, default=False, nullable=False)
+
+    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(),
+                           onupdate=func.now(), nullable=False)
+
+    # Relationship to OrderItem
+    items = db.relationship('OrderItem', backref='order', cascade="all, delete-orphan", lazy=True)
+
+    def __repr__(self):
+        return f"<Order {self.id} | User {self.user_id}>"
+
+    @staticmethod
+    def validate_status(status):
+        return status in ['pending', 'preparing', 'ready', 'completed', 'cancelled']
+
+    def calculate_total(self):
+        """Calculate total using related OrderItem rows."""
+        return sum(item.quantity * item.menu_item.price for item in self.items)
+
+    def to_dict(self, include_items=True, include_user=False):
+        data = {
+            "id": self.id,
+            "user_id": self.user_id,
+            "status": self.status,
+            "is_paid": self.is_paid,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "total_price": self.calculate_total()
+        }
+
+        if include_items:
+            data["items"] = [item.to_dict(include_menu=True) for item in self.items]
+
+        if include_user:
+            data["user"] = self.user.to_dict()
+
+        return data
+
+
+class OrderItem(db.Model):
+    """Join table: items inside an order"""
+    __tablename__ = 'order_items'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False, index=True)
+    menu_item_id = db.Column(db.Integer, db.ForeignKey('menu_items.id'), nullable=False, index=True)
+
+    # Relationship to menu item
+    menu_item = db.relationship('MenuItem', backref=db.backref('order_items', lazy=True))
+
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+
+    def __repr__(self):
+        return f"<OrderItem Order {self.order_id} | MenuItem {self.menu_item_id}>"
+
+    def to_dict(self, include_menu=False):
+        data = {
+            "id": self.id,
+            "order_id": self.order_id,
+            "menu_item_id": self.menu_item_id,
+            "quantity": self.quantity
+        }
+
+        if include_menu:
+            data["menu_item"] = self.menu_item.to_dict()
+
+        return data
