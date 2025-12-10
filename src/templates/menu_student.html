@@ -1,0 +1,27 @@
+{% extends "base_student.html" %}
+
+{% block title %}Menu - Cafeteria{% endblock %}
+
+{% block content %}
+<div style="padding: 2rem;">
+  <h1 style="color: var(--bounty-blue); text-align: center; margin-bottom: 2rem;">Our Menu</h1>
+  
+  <!-- Filter Options -->
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <button class="btn" onclick="filterMenu('all')" id="filter-all">All Items</button>
+    <button class="btn" onclick="filterMenu('available')" id="filter-available">Available Only</button>
+  </div>
+  
+  <!-- Menu Items Container -->
+  <div class="card-container" id="menu-container">
+    <p style="text-align: center; width: 100%;">Loading menu...</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/menu.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/cart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/menu-student.js') }}"></script>
+{% endblock %}

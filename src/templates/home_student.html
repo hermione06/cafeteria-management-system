@@ -1,0 +1,44 @@
+{% extends "base_student.html" %}
+
+{% block title %}Home - UFAZ Cafeteria{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home_style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+  <h1 class="home-title">Welcome to UFAZ Cafeteria</h1>
+  
+  <div class="card-container">
+    <div class="card">
+      <h3>Browse Menu</h3>
+      <p>View available items on the menu</p>
+      <a href="{{ url_for('menu_student_page') }}" class="btn">View Menu</a>
+    </div>
+    
+    <div class="card">
+      <h3>My Orders</h3>
+      <p>View your</p>
+      <a href="{{ url_for('order_student_page') }}" class="btn">Order Now</a>
+    </div>
+    
+    <div class="card">
+      <h3>Dashboard</h3>
+      <a href="{{ url_for('dashboard_student_page') }}" class="btn">View Dashboard</a>
+    </div>
+  </div>
+  
+  <section class="announcements-section">
+    <h2 class="announcements-title">Latest Announcements</h2>
+    <div id="announcements-container">
+      <p class="announcement-loading">Loading announcements...</p>
+    </div>
+    <button id="show-all-btn" class="btn">Show All Announcements</button>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/announcements.js') }}"></script>
+{% endblock %}

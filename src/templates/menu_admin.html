@@ -1,0 +1,76 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Menu Management - Cafeteria{% endblock %}
+
+{% block content %}
+<div style="padding: 2rem;">
+  <h1 style="color: var(--bounty-blue); text-align: center; margin-bottom: 2rem;">Menu Management</h1>
+  
+  <!-- Add New Item Button -->
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <button class="btn" onclick="showAddModal()" style="background-color: #28a745;">+ Add New Menu Item</button>
+  </div>
+  
+  <!-- Filter Options -->
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <button class="btn" onclick="filterMenu('all')" id="filter-all">All Items</button>
+    <button class="btn" onclick="filterMenu('available')" id="filter-available">Available Only</button>
+    <button class="btn" onclick="filterMenu('unavailable')" id="filter-unavailable">Unavailable Only</button>
+  </div>
+  
+  <!-- Menu Items Container -->
+  <div class="card-container" id="menu-container">
+    <p style="text-align: center; width: 100%;">Loading menu...</p>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="item-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
+  <div style="background-color: white; margin: 50px auto; padding: 2rem; border-radius: var(--radius); max-width: 500px; position: relative;">
+    <span onclick="closeModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; cursor: pointer; color: #888;">&times;</span>
+    
+    <h2 id="modal-title" style="color: var(--bounty-blue); margin-bottom: 1.5rem;">Add New Item</h2>
+    
+    <form id="item-form" onsubmit="saveItem(event)">
+      <input type="hidden" id="item-id">
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #555;">Name:</label>
+        <input type="text" id="item-name" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: var(--radius);">
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #555;">Description:</label>
+        <textarea id="item-description" rows="3" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: var(--radius);"></textarea>
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #555;">Price ($):</label>
+        <input type="number" id="item-price" step="0.01" min="0" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: var(--radius);">
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: #555;">Picture URL:</label>
+        <input type="url" id="item-picture" placeholder="https://example.com/image.jpg" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: var(--radius);">
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: flex; align-items: center; cursor: pointer;">
+          <input type="checkbox" id="item-available" checked style="margin-right: 0.5rem;">
+          <span style="color: #555;">Available</span>
+        </label>
+      </div>
+      
+      <button type="submit" class="btn" style="width: 100%;">Save Item</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/common/modal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/menu.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/menu-admin.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/menu-admin-page.js') }}"></script>
+{% endblock %}
