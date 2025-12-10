@@ -1,0 +1,155 @@
+{% extends "base_student.html" %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/student_dashboard.css') }}">
+{% endblock %}
+
+{% block head %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('student-dashboard');
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container student">
+
+  <!-- Welcome Section -->
+  <section class="welcome-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h2 style="margin: 0;">Welcome, <span id="student-name">Student</span>!</h2>
+        <p style="margin: 0.5rem 0 0 0;">Manage your orders and view your cafeteria activity.</p>
+      </div>
+      <a href="{{ url_for('login_page') }}" class="btn">Logout</a>
+    </div>
+  </section>
+
+  <!-- Quick Stats -->
+  <section>
+    <h3 style="margin-bottom: 1rem;">Quick Stats</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="total-orders">0</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Total Orders</p>
+      </div>
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="pending-orders">0</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Pending Orders</p>
+      </div>
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="total-spent">$0.00</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Total Spent</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Most Recent Order & Rating -->
+  <section id="recent-order-section" style="display: none;">
+    <h3 style="margin-bottom: 1rem;">Your Most Recent Order</h3>
+    <div style="background: var(--bounty-light); padding: 1.5rem; border-radius: var(--radius);">
+      <div style="margin-bottom: 1rem;">
+        <p style="margin: 0;"><strong>Order #<span id="recent-order-id"></span></strong></p>
+        <p style="margin: 0.3rem 0; font-size: 0.9rem;">Date: <span id="recent-order-date"></span></p>
+        <p style="margin: 0.3rem 0; font-size: 0.9rem;">Status: <span id="recent-order-status"></span></p>
+        <p style="margin: 0.3rem 0;"><strong>Total: $<span id="recent-order-total"></span></strong></p>
+      </div>
+      
+      <div id="recent-order-items" style="margin-bottom: 1rem;"></div>
+      
+      <div id="rating-section">
+        <h4 style="margin-bottom: 0.5rem;">Rate Your Dishes</h4>
+        <div id="rating-items"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Orders -->
+  <section>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+      <h3 style="margin: 0;">Recent Orders</h3>
+      <button class="btn" onclick="toggleAllOrders()" id="toggle-orders-btn">View All Orders</button>
+    </div>
+
+    <div id="orders-container">
+      <p>Loading orders...</p>
+    </div>
+    
+    <!-- Pagination -->
+    <div id="pagination-container" style="display: none; margin-top: 1rem; text-align: center;">
+      <button class="btn" onclick="changePage(-1)" style="margin-right: 0.5rem;">Previous</button>
+      <span id="page-info" style="margin: 0 1rem;">Page 1</span>
+      <button class="btn" onclick="changePage(1)">Next</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- Rating Modal -->
+<div id="rating-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
+  <div style="background-color: white; margin: 50px auto; padding: 2rem; border-radius: var(--radius); max-width: 500px; position: relative;">
+    <span onclick="closeRatingModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; cursor: pointer;">&times;</span>
+    
+    <h3 id="rating-modal-title" style="margin-top: 0; margin-bottom: 1rem;">Rate Dish</h3>
+    
+    <form id="rating-form" onsubmit="submitRating(event)">
+      <input type="hidden" id="rating-dish-id">
+      <input type="hidden" id="rating-order-id">
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem;">Rating (1-5):</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="rating-star" data-value="1" onclick="selectRating(1)">⭐</button>
+          <button type="button" class="rating-star" data-value="2" onclick="selectRating(2)">⭐</button>
+          <button type="button" class="rating-star" data-value="3" onclick="selectRating(3)">⭐</button>
+          <button type="button" class="rating-star" data-value="4" onclick="selectRating(4)">⭐</button>
+          <button type="button" class="rating-star" data-value="5" onclick="selectRating(5)">⭐</button>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem;">Comment (optional):</label>
+        <textarea id="rating-comment" rows="3" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: var(--radius);"></textarea>
+      </div>
+      
+      <button type="submit" class="btn" style="width: 100%;">Submit Rating</button>
+    </form>
+  </div>
+</div>
+
+<!-- Order Details Modal -->
+<div id="order-details-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; align-items: center; justify-content: center;">
+  <div id="order-details-content"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Common utilities -->
+<script src="{{ url_for('static', filename='js/common/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/common/modal.js') }}"></script>
+
+<!-- Modules -->
+<script src="{{ url_for('static', filename='js/modules/orders.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/ratings.js') }}"></script>
+
+<!-- Page-specific script -->
+<script src="{{ url_for('static', filename='js/pages/student-dashboard.js') }}"></script>
+
+<style>
+.rating-star {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+}
+
+.rating-star:hover {
+  opacity: 0.7;
+}
+</style>
+{% endblock %}

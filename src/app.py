@@ -203,58 +203,90 @@ def dashboard():
 ### RENDERING HTML PAGES
 
 @app.route('/')
-def home_page():  # Change this line
-    """Render homepage (home.html)"""
-    return render_template('home.html')
+def home_unlogged_page():
+    """Render home_unlogged.html"""
+    return render_template('home_unlogged.html')
 
-@app.route('/menu-page')
-def menu_page():
-    """Render menu.html"""
-    return render_template('menu.html')
+@app.route('/home_admin')
+def home_admin_page():
+    """Render home_admin.html"""
+    return render_template('home_admin.html')
 
-@app.route('/student-dashboard')
-def student_dashboard_page():
-    """Render student_dashboard.html"""
-    return render_template('student_dashboard.html')
+@app.route('/home_student')
+def home_student_page():
+    """Render home_student.html"""
+    return render_template('home_student.html')
 
-@app.route('/admin-dashboard')
-def admin_dashboard_page():
-    """Render admin_dashboard.html"""
-    return render_template('admin_dashboard.html')
+
+# ---------------- MENUS ----------------
+
+@app.route('/menu_admin')
+def menu_admin_page():
+    return render_template('menu_admin.html')
+
+@app.route('/menu_student')
+def menu_student_page():
+    return render_template('menu_student.html')
+
+@app.route('/menu_unlogged')
+def menu_unlogged_page():
+    return render_template('menu_unlogged.html')
+
+
+# ---------------- DASHBOARDS ----------------
+
+@app.route('/dashboard_admin')
+def dashboard_admin_page():
+    return render_template('dashboard_admin.html')
+
+@app.route('/dashboard_student')
+def dashboard_student_page():
+    return render_template('dashboard_student.html')
+
+
+# ---------------- AUTH / MISC ----------------
 
 @app.route('/login')
 def login_page():
-    """Render login.html"""
     return render_template('login.html')
 
-@app.route('/order')
-def order_page():
-    """Render order.html"""
-    return render_template('order.html')
+@app.route('/order_admin')
+def order_admin_page():
+    return render_template('order_admin.html')
 
-@app.route('/registration', methods=['GET'])
+@app.route('/order_student')
+def order_student_page():
+    return render_template('order_student.html')
+
+@app.route('/registration')
 def registration_page():
     return render_template('registration.html', current_year=datetime.now().year)
+
 
 @app.route('/send_verification_code', methods=['POST'])
 def send_verification_code():
     email = request.form['email']
-    # TODO: send code via email logic here
+    # TODO: Email logic
     return "Code sent to " + email
+
 
 @app.route('/verify_code', methods=['POST'])
 def verify_code():
     code = request.form['code']
-    # TODO: real verification logic
+    # TODO: Code verify logic
     return "Code verified"
+
 
 @app.route('/register_user', methods=['POST'])
 def register_user():
     email = request.form['email']
     password = request.form['password']
-    # TODO: Save user to DB here
+    # TODO: Save to DB
     return redirect(url_for('login_page'))
 
+@app.route('/test')
+def test():
+    return render_template('test.html')
 
 if __name__ == '__main__':
     # Create tables if they don't exist (useful for Docker)

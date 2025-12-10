@@ -1,0 +1,37 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Orders Management - Cafeteria{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/order_style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="padding: 2rem;">
+  <h1 style="color: var(--bounty-blue); text-align: center; margin-bottom: 2rem;">Orders Management</h1>
+  
+  <!-- Filter Buttons -->
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <button class="btn" id="filter-active">Active Orders</button>
+    <button class="btn" id="filter-completed">Completed Orders</button>
+    <button class="btn" id="filter-all">All Orders</button>
+  </div>
+  
+  <!-- Orders Container -->
+  <div id="orders-container" style="max-width: 1200px; margin: 0 auto;">
+    <p style="text-align: center;">Loading orders...</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Common utilities -->
+<script src="{{ url_for('static', filename='js/common/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/common/modal.js') }}"></script>
+
+<!-- Modules -->
+<script src="{{ url_for('static', filename='js/modules/orders.js') }}"></script>
+
+<!-- Page script -->
+<script src="{{ url_for('static', filename='js/pages/admin-orders.js') }}"></script>
+{% endblock %}

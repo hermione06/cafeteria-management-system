@@ -1,0 +1,158 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container admin">
+  
+  <!-- Welcome Section -->
+  <section>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h2 style="margin: 0;">Admin Dashboard</h2>
+        <p style="margin: 0.5rem 0 0 0;">Manage cafeteria operations, announcements, and reports.</p>
+      </div>
+      <a href="{{ url_for('login_page') }}" class="btn">Logout</a>
+    </div>
+  </section>
+  
+  <!-- Statistics Overview -->
+  <section>
+    <h3 style="margin-bottom: 1rem;">Statistics Overview</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="stat-orders-today">0</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Orders Today</p>
+      </div>
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="stat-revenue-today">$0.00</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Revenue Today</p>
+      </div>
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="stat-total-orders">0</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Total Orders</p>
+      </div>
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="stat-total-revenue">$0.00</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Total Revenue</p>
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="stat-active-dishes">0</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Active Dishes</p>
+      </div>
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="stat-total-dishes">0</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Total Dishes</p>
+      </div>
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="stat-avg-order">$0.00</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Avg Order Value</p>
+      </div>
+      <div style="background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); text-align: center;">
+        <h4 style="margin: 0; font-size: 1.8rem;" id="stat-pending-orders">0</h4>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Pending Orders</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Announcements -->
+  <section>
+    <h3 style="margin-bottom: 1rem;">Announcements</h3>
+    <button class="btn" onclick="showAddAnnouncementForm()" style="margin-bottom: 1rem;">+ Post Announcement</button>
+    
+    <!-- Add Announcement Form -->
+    <div id="add-announcement-form" style="display: none; background: var(--bounty-light); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+      <h4 style="margin-top: 0;">New Announcement</h4>
+      <textarea id="announcement-message" placeholder="Announcement message..." style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #ccc; border-radius: 4px;" rows="4"></textarea>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn" onclick="submitAnnouncement()">Post</button>
+        <button class="btn" onclick="hideAddAnnouncementForm()">Cancel</button>
+      </div>
+    </div>
+    
+    <div id="announcements-list">
+      <p>Loading announcements...</p>
+    </div>
+  </section>
+  
+  <!-- Reports -->
+  <section>
+    <h3 style="margin-bottom: 1rem;">Generate Reports</h3>
+    
+    <!-- Report Options -->
+    <div style="background: var(--bounty-light); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1rem;">
+      <h4 style="margin-top: 0;">Report Configuration</h4>
+      
+      <!-- Date Range -->
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Date Range:</label>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 150px;">
+            <label style="display: block; margin-bottom: 0.3rem; font-size: 0.9rem;">Start Date:</label>
+            <input type="date" id="report-start-date" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <label style="display: block; margin-bottom: 0.3rem; font-size: 0.9rem;">End Date:</label>
+            <input type="date" id="report-end-date" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+        </div>
+        <div style="margin-top: 0.5rem;">
+          <button class="btn" onclick="setDateRange('today')" style="padding: 0.3rem 0.6rem; font-size: 0.85rem; margin-right: 0.5rem;">Today</button>
+          <button class="btn" onclick="setDateRange('week')" style="padding: 0.3rem 0.6rem; font-size: 0.85rem; margin-right: 0.5rem;">This Week</button>
+          <button class="btn" onclick="setDateRange('month')" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">This Month</button>
+        </div>
+      </div>
+      
+      <!-- Report Type -->
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Report Type:</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+          <label style="display: flex; align-items: center; cursor: pointer;">
+            <input type="checkbox" id="include-sales" checked style="margin-right: 0.3rem;">
+            <span style="font-size: 0.9rem;">Sales Summary</span>
+          </label>
+          <label style="display: flex; align-items: center; cursor: pointer;">
+            <input type="checkbox" id="include-orders" checked style="margin-right: 0.3rem;">
+            <span style="font-size: 0.9rem;">Orders Analysis</span>
+          </label>
+          <label style="display: flex; align-items: center; cursor: pointer;">
+            <input type="checkbox" id="include-dishes" checked style="margin-right: 0.3rem;">
+            <span style="font-size: 0.9rem;">Popular Dishes</span>
+          </label>
+          <label style="display: flex; align-items: center; cursor: pointer;">
+            <input type="checkbox" id="include-revenue" checked style="margin-right: 0.3rem;">
+            <span style="font-size: 0.9rem;">Revenue Breakdown</span>
+          </label>
+        </div>
+      </div>
+      
+      <button class="btn" onclick="generateReport()" style="width: 100%;">Generate Report</button>
+    </div>
+    
+    <div id="reports-container">
+      <p>Configure and generate a report above.</p>
+    </div>
+  </section>
+  
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Common utilities -->
+<script src="{{ url_for('static', filename='js/common/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/common/modal.js') }}"></script>
+
+<!-- Modules -->
+<script src="{{ url_for('static', filename='js/modules/announcements.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/reports.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/admin-stats.js') }}"></script>
+
+<!-- Page-specific script -->
+<script src="{{ url_for('static', filename='js/pages/admin-dashboard.js') }}"></script>
+{% endblock %}
