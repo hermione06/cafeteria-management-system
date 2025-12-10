@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "base_unlogged.html" %}
 {% block title %}Login - Cafeteria{% endblock %}
 
 {% block content %}
 <section style="display: flex; justify-content: center; align-items: center; min-height: 75vh; padding: 1rem;">
   <div class="card" style="max-width: 400px; width: 100%;">
-    <h2 style="text-align: center;">🔐 Student Login</h2>
+    <h2 style="text-align: center;">Student Login</h2>
     
     <form action="{{ url_for('login_page') }}" method="POST" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
       <div>

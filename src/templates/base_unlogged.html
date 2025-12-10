@@ -12,10 +12,8 @@
   <!-- ====== Navbar ====== -->
   <nav class="navbar">
     <div class="nav-links">
-      <a href="{{ url_for('home_page') }}">Home</a>
-      <a href="{{ url_for('menu_page') }}">Menu</a>
-      <a href="{{ url_for('order_page') }}">Orders</a>
-      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('home_unlogged_page') }}">Home</a>
+      <a href="{{ url_for('menu_unlogged_page') }}">Menu</a>
       <a href="{{ url_for('login_page') }}">Login</a>
     </div>
   </nav>
@@ -27,7 +25,7 @@
 
   <!-- ====== Footer ====== -->
   <footer>
-    <p>&copy; 2025 University Cafeteria | All rights reserved</p>
+    <p>&copy; 2025 UFAZ Cafeteria | All rights reserved</p>
   </footer>
 
   {% block scripts %}{% endblock %}
