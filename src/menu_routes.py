@@ -21,8 +21,7 @@ def allowed(filename):
 @menu_bp.route("/", methods=["GET"])
 def get_menu():
     items = MenuItem.query.all()
-    if not items:
-        return jsonify({"error": "No menu items found"}), 404
+    # Return empty list [] with 200 OK if no items exist, instead of 404
     return jsonify([item.to_dict() for item in items]), 200
 
 

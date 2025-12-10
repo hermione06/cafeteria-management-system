@@ -15,7 +15,7 @@ from models import User
 
 @pytest.fixture
 def client():
-    """Create a test client with in-memory database"""
+    """Create a test client with in-memory database and proper context management"""
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -23,12 +23,18 @@ def client():
         "connect_args": {"check_same_thread": False}
     }
     
-    with app.test_client() as client:
-        with app.app_context():
-            db.create_all()
+    # 1. Manually set up the application context
+    # This ensures that db.create_all() and db.drop_all() run within a valid context.
+    with app.app_context():
+        # 2. Create tables before running tests
+        db.create_all()
+        
+        # 3. Yield the test client (which creates a request context inside the app context)
+        with app.test_client() as client:
             yield client
-            db.session.remove()
-            db.drop_all()
+            
+        # 4. Explicitly tear down the database after tests complete
+        db.drop_all()
 
 @pytest.fixture
 def sample_menu_items(client):
@@ -75,39 +81,6 @@ def test_health_check(client):
     assert response.status_code == 200
     assert b'healthy' in response.data
 
-# ===== OLD MENU TESTS (Commented out - for in-memory menu system) =====
-# def test_get_menu(client):
-#     """Test getting all menu items"""
-#     response = client.get('/menu')
-#     assert response.status_code == 200
-#     assert b'menu' in response.data
-
-# def test_get_menu_item_success(client):
-#     """Test getting a specific menu item that exists"""
-#     response = client.get('/menu/1')
-#     assert response.status_code == 200
-#     assert b'Coffee' in response.data
-
-# def test_get_menu_item_not_found(client):
-#     """Test getting a menu item that doesn't exist"""
-#     response = client.get('/menu/999')
-#     assert response.status_code == 404
-#     assert b'Item not found' in response.data
-
-# def test_get_menu_by_category(client):
-#     """Test filtering menu items by category"""
-#     response = client.get('/menu/category/Beverages')
-#     assert response.status_code == 200
-#     assert b'Coffee' in response.data
-#     assert b'Beverages' in response.data
-
-# def test_get_menu_by_empty_category(client):
-#     """Test filtering menu items by non-existent category"""
-#     response = client.get('/menu/category/Desserts')
-#     assert response.status_code == 200
-#     assert b'No items found' in response.data
-
-# ===== NEW MENU TESTS (Database-backed menu system) =====
 
 def test_get_menu_new(client, sample_menu_items):
     """Test getting all menu items from database"""
@@ -124,7 +97,8 @@ def test_get_menu_empty_database(client):
     """Test getting menu when database is empty"""
     response = client.get('/menu/')
     # The route returns 404 when no menu items exist, not 200 with empty array
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.get_json() == []
 
 def test_get_menu_item_success_new(client, sample_menu_items):
     """Test getting a specific menu item that exists"""
