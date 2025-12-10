@@ -6,10 +6,21 @@
   <div class="card" style="max-width: 400px; width: 100%;">
     <h2 style="text-align: center;">Student Login</h2>
     
-    <form action="{{ url_for('login_page') }}" method="POST" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" style="padding: 0.8rem; margin: 1rem 0; border-radius: var(--radius); background: {% if category == 'error' %}#fee;{% else %}#efe;{% endif %} border: 1px solid {% if category == 'error' %}#fcc;{% else %}#cfc;{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    
+    <form id="login-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
       <div>
-        <label for="email">Email</label><br>
-        <input type="email" id="email" name="email" required
+        <label for="username">Username or Email</label><br>
+        <input type="text" id="username" name="username" required
                style="width: 100%; padding: 0.6rem; border-radius: var(--radius); border: 1px solid #ccc;">
       </div>
       <div>
@@ -17,13 +28,52 @@
         <input type="password" id="password" name="password" required
                style="width: 100%; padding: 0.6rem; border-radius: var(--radius); border: 1px solid #ccc;">
       </div>
+      <div style="text-align: right;">
+        <a href="{{ url_for('forgot_password_page') }}" style="color: var(--bounty-blue); text-decoration: none; font-size: 0.9rem;">Forgot Password?</a>
+      </div>
       <button type="submit" class="btn" style="margin-top: 0.5rem;">Login</button>
     </form>
 
     <p style="text-align: center; margin-top: 1rem;">
-      Don’t have an account?
+      Don't have an account?
       <a href="{{ url_for('registration_page') }}" style="color: var(--bounty-blue); text-decoration: none;">Register here</a>
     </p>
   </div>
 </section>
+
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  
+  try {
+    const response = await fetch('/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      // Store tokens
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
+    } else {
+      alert(data.error || 'Login failed');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('An error occurred during login');
+  }
+});
+</script>
 {% endblock %}
