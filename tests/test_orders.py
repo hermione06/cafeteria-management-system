@@ -18,6 +18,7 @@ def client():
 
         # Setup test user + menu items
         user = User(username="testuser", email="t@t.com")
+        user.set_password("testpassword")
         db.session.add(user)
 
         item1 = MenuItem(name="Burger", price=5.0)
