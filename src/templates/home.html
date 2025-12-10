@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Home - UFAZ Cafeteria{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home_style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="padding: 2rem; text-align: center;">
+  <h1 style="color: var(--bounty-blue); margin-bottom: 2rem;">Welcome to UFAZ Cafeteria</h1>
+  
+  <div class="card-container">
+    <!-- Feature Card 1 -->
+    <div class="card">
+      <h3 style="color: var(--bounty-blue);">Browse Menu</h3>
+      <a href="{{ url_for('menu_page') }}" class="btn">View Menu</a>
+    </div>
+    
+    <!-- Feature Card 2 -->
+    <div class="card">
+      <h3 style="color: var(--bounty-blue);">My Order</h3>
+      <a href="{{ url_for('order_page') }}" class="btn">Order Now</a>
+    </div>
+    
+    <!-- Feature Card 3 -->
+    <div class="card">
+      <h3 style="color: var(--bounty-blue);">Dashboard</h3>
+      <a href="{{ url_for('dashboard') }}" class="btn">View Dashboard</a>
+    </div>
+  </div>
+  
+  <!-- Announcements Section -->
+  <section style="margin-top: 3rem; padding: 2rem; background-color: var(--bounty-white); border-radius: var(--radius); box-shadow: 0 4px 12px var(--bounty-shadow); max-width: 800px; margin-left: auto; margin-right: auto;">
+    <h2 style="color: var(--bounty-blue); margin-bottom: 1rem;">Latest Announcements</h2>
+    <div id="announcements-container">
+      <p>Loading announcements...</p>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Fetch and display announcements
+  async function loadAnnouncements() {
+    try {
+      const response = await fetch('/announcements');
+      const data = await response.json();
+      
+      const container = document.getElementById('announcements-container');
+      
+      if (data.announcements && data.announcements.length > 0) {
+        container.innerHTML = data.announcements.map(announcement => `
+          <div style="padding: 1rem; border-left: 4px solid var(--bounty-blue); margin-bottom: 1rem; background-color: var(--bounty-light);">
+            <p style="margin: 0; color: #555;">${announcement.message}</p>
+            <small style="color: #888;">${new Date(announcement.date_posted).toLocaleDateString()}</small>
+          </div>
+        `).join('');
+      } else {
+        container.innerHTML = '<p style="color: #888;">No announcements at this time.</p>';
+      }
+    } catch (error) {
+      console.error('Error loading announcements:', error);
+      document.getElementById('announcements-container').innerHTML = 
+        '<p style="color: #888;">Unable to load announcements.</p>';
+    }
+  }
+  
+  // Load announcements when page loads
+  document.addEventListener('DOMContentLoaded', loadAnnouncements);
+</script>
+{% endblock %}
