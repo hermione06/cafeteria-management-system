@@ -1,73 +1,291 @@
 {% extends "base.html" %}
 
-{% block title %}My Profile - CafeHub{% endblock %}
+{% block title %}My Profile - Bounty Cafeteria{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=League+Spartan:wght@100..900&display=swap');
+
+    /* Page Header with Gradient */
+    .profile-header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 0;
+        margin-top: 3rem;
+    }
+
+    .gradient-box-profile {
+        width: 100%;
+        height: 120px;
+        background: linear-gradient(180deg, #fff963 0%, #ffffff00 100%);
+        border-radius: 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .profile-title {
+        font-family: 'League Spartan', sans-serif;
+        font-size: 15rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+        letter-spacing: 8px;
+        margin: 0;
+        position: absolute;
+        top: 3%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .profile-subtitle {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #4cb290;
+        letter-spacing: 0.5px;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    /* Profile Card */
+    .profile-card {
+        background: white;
+        border-radius: 30px;
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.2);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .profile-banner {
+        background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+        padding: 3rem 2rem;
+        text-align: center;
+        color: white;
+    }
+
+    .profile-icon-wrapper {
+        display: inline-block;
+        background: white;
+        border-radius: 50%;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-icon {
+        font-size: 5rem;
+        color: #4cb290;
+    }
+
+    .profile-name {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-email {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .profile-form {
+        padding: 2.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        color: #2D3748;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #4cb290;
+        box-shadow: 0 0 0 3px rgba(76, 178, 144, 0.1);
+    }
+
+    .form-input:disabled {
+        background: #f7fafc;
+        color: #a0aec0;
+        cursor: not-allowed;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .update-button {
+        width: 100%;
+        background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 5px 15px rgba(255, 230, 109, 0.4);
+    }
+
+    .update-button:hover {
+        background: linear-gradient(135deg, #FFD93D 0%, #FFC700 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(255, 230, 109, 0.6);
+    }
+
+    /* Password Card */
+    .password-card {
+        background: white;
+        border-radius: 30px;
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.2);
+        padding: 2.5rem;
+    }
+
+    .password-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2D3748;
+        margin-bottom: 2rem;
+    }
+
+    .password-hint {
+        font-size: 0.85rem;
+        color: #a0aec0;
+        margin-top: 0.5rem;
+    }
+
+    .change-password-button {
+        width: 100%;
+        background: #4cb290;
+        color: white;
+        padding: 1rem;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 5px 15px rgba(76, 178, 144, 0.3);
+    }
+
+    .change-password-button:hover {
+        background: #3da080;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-title {
+            font-size: 8rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <!-- Page Header -->
-    <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-800 mb-2">
-            <i class="fas fa-user-circle mr-3"></i> My Profile
-        </h1>
-        <p class="text-gray-600">Manage your account information</p>
+<!-- Page Header -->
+<div class="profile-header">
+    <div class="gradient-box-profile">
+        <h1 class="profile-title">profile</h1>
     </div>
+    <p class="profile-subtitle">MANAGE YOUR ACCOUNT INFORMATION</p>
+</div>
 
+<div class="profile-container">
     <!-- Profile Card -->
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-        <div class="gradient-bg p-8 text-center">
-            <div class="inline-block bg-white rounded-full p-4 mb-4">
-                <i class="fas fa-user-circle text-6xl text-primary"></i>
+    <div class="profile-card">
+        <div class="profile-banner">
+            <div class="profile-icon-wrapper">
+                <i class="fas fa-user-circle profile-icon"></i>
             </div>
-            <h2 class="text-2xl font-bold text-white" id="profileUsername">Loading...</h2>
-            <p class="text-white/80" id="profileEmail">loading@example.com</p>
+            <h2 class="profile-name" id="profileUsername">Loading...</h2>
+            <p class="profile-email" id="profileEmail">loading@example.com</p>
         </div>
 
-        <div class="p-8">
-            <form id="profileForm" class="space-y-6">
+        <div class="profile-form">
+            <form id="profileForm">
                 <!-- Username -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">
+                <div class="form-group">
+                    <label class="form-label">
                         <i class="fas fa-user mr-2"></i> Username
                     </label>
                     <input 
                         type="text" 
                         id="username" 
                         name="username"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                        class="form-input"
                     >
                 </div>
 
                 <!-- Email -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">
+                <div class="form-group">
+                    <label class="form-label">
                         <i class="fas fa-envelope mr-2"></i> Email
                     </label>
                     <input 
                         type="email" 
                         id="email" 
                         name="email"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                        class="form-input"
                     >
                 </div>
 
                 <!-- Account Info -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">Role</label>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Role</label>
                         <input 
                             type="text" 
                             id="role" 
                             disabled
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100"
+                            class="form-input"
                         >
                     </div>
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">Status</label>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
                         <input 
                             type="text" 
                             id="status" 
                             disabled
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100"
+                            class="form-input"
                         >
                     </div>
                 </div>
@@ -75,7 +293,7 @@
                 <!-- Update Button -->
                 <button 
                     type="submit"
-                    class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition transform hover:scale-105"
+                    class="update-button"
                 >
                     <i class="fas fa-save mr-2"></i> Update Profile
                 </button>
@@ -84,54 +302,54 @@
     </div>
 
     <!-- Change Password Card -->
-    <div class="bg-white rounded-2xl shadow-xl p-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+    <div class="password-card">
+        <h2 class="password-title">
             <i class="fas fa-lock mr-2"></i> Change Password
         </h2>
 
-        <form id="passwordForm" class="space-y-6">
+        <form id="passwordForm">
             <!-- Current Password -->
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Current Password</label>
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
                 <input 
                     type="password" 
                     id="oldPassword" 
                     name="old_password"
                     required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    class="form-input"
                 >
             </div>
 
             <!-- New Password -->
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">New Password</label>
+            <div class="form-group">
+                <label class="form-label">New Password</label>
                 <input 
                     type="password" 
                     id="newPassword" 
                     name="new_password"
                     required
                     minlength="8"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    class="form-input"
                 >
-                <p class="text-xs text-gray-500 mt-1">At least 8 characters</p>
+                <p class="password-hint">At least 8 characters</p>
             </div>
 
             <!-- Confirm Password -->
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Confirm New Password</label>
+            <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
                 <input 
                     type="password" 
                     id="confirmPassword" 
                     name="confirm_password"
                     required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    class="form-input"
                 >
             </div>
 
             <!-- Change Password Button -->
             <button 
                 type="submit"
-                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+                class="change-password-button"
             >
                 <i class="fas fa-key mr-2"></i> Change Password
             </button>

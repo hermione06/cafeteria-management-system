@@ -1,25 +1,482 @@
 {% extends "base.html" %}
 
-{% block title %}My Orders - CafeHub{% endblock %}
+{% block title %}My Orders - Bounty Cafeteria{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=League+Spartan:wght@100..900&display=swap');
+
+    /* Page Header with Gradient */
+    .orders-header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 0;
+        margin-top: 3rem;
+    }
+
+    .gradient-box-orders {
+        width: 100%;
+        height: 120px;
+        background: linear-gradient(180deg, #fff963 0%, #ffffff00 100%);
+        border-radius: 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .orders-title {
+        font-family: 'League Spartan', sans-serif;
+        font-size: 15rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+        letter-spacing: 8px;
+        margin: 0;
+        position: absolute;
+        top: 3%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .orders-subtitle {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #4cb290;
+        letter-spacing: 0.5px;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: white;
+        border-radius: 30px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.2);
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .filter-label {
+        display: block;
+        color: #2D3748;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 50px;
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #4cb290;
+        box-shadow: 0 0 0 3px rgba(76, 178, 144, 0.1);
+    }
+
+    /* Order Cards */
+    .order-card {
+        background: white;
+        border-radius: 25px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .order-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(76, 178, 144, 0.3);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .order-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2D3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .order-date {
+        color: #4A5568;
+        font-size: 0.9rem;
+    }
+
+    .order-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .badge-pending { background: #FFF9C4; color: #F59E0B; }
+    .badge-confirmed { background: #CCEFFF; color: #3fc7df; }
+    .badge-preparing { background: #FFE4D6; color: #FF9A76; }
+    .badge-ready { background: #c6f6d5; color: #48bb78; }
+    .badge-completed { background: #c6f6d5; color: #22543d; }
+    .badge-cancelled { background: #FEE2E2; color: #DC2626; }
+    .badge-paid { background: #c6f6d5; color: #22543d; }
+    .badge-unpaid { background: #FEE2E2; color: #DC2626; }
+
+    /* Order Items */
+    .order-items {
+        border-top: 2px solid #f7fafc;
+        padding-top: 1.5rem;
+    }
+
+    .items-title {
+        font-weight: 700;
+        color: #2D3748;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .item-name {
+        color: #4A5568;
+    }
+
+    .item-price {
+        color: #2D3748;
+        font-weight: 700;
+    }
+
+    .more-items {
+        font-size: 0.9rem;
+        color: #a0aec0;
+        font-style: italic;
+    }
+
+    /* Special Instructions */
+    .special-note {
+        border-top: 2px solid #f7fafc;
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+        font-size: 0.95rem;
+        color: #4A5568;
+    }
+
+    /* Order Footer */
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #f7fafc;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .total-label {
+        color: #4A5568;
+        font-size: 0.9rem;
+    }
+
+    .total-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #4cb290;
+        margin-left: 0.5rem;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-view {
+        background: #4cb290;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .btn-view:hover {
+        background: #3da080;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(76, 178, 144, 0.4);
+    }
+
+    .btn-cancel {
+        background: #FF6B6B;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .btn-cancel:hover {
+        background: #e85555;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    /* Empty State */
+    .empty-state {
+        background: white;
+        border-radius: 30px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        color: #e2e8f0;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state p {
+        font-size: 1.3rem;
+        color: #4A5568;
+        margin-bottom: 2rem;
+        font-weight: 600;
+    }
+
+    .empty-state-btn {
+        background: #4cb290;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .empty-state-btn:hover {
+        background: #3da080;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(76, 178, 144, 0.4);
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        text-align: center;
+        padding: 3rem;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .spinner-icon {
+        font-size: 3rem;
+        color: #4cb290;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 30px;
+        max-width: 900px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+        color: white;
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .modal-close:hover {
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-item {
+        color: #4A5568;
+        font-size: 0.9rem;
+    }
+
+    .detail-value {
+        font-weight: 700;
+        color: #2D3748;
+        margin-top: 0.25rem;
+    }
+
+    .items-section {
+        border-top: 2px solid #e2e8f0;
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .section-title {
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: #2D3748;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f7fafc;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .modal-item-details {
+        flex: 1;
+    }
+
+    .modal-item-name {
+        font-weight: 700;
+        color: #2D3748;
+        margin-bottom: 0.25rem;
+    }
+
+    .modal-item-desc {
+        font-size: 0.9rem;
+        color: #4A5568;
+        margin-bottom: 0.25rem;
+    }
+
+    .modal-item-calc {
+        font-size: 0.85rem;
+        color: #a0aec0;
+    }
+
+    .modal-item-price {
+        font-weight: 700;
+        color: #4cb290;
+        font-size: 1.2rem;
+    }
+
+    .modal-total {
+        border-top: 2px solid #e2e8f0;
+        padding-top: 1.5rem;
+        margin-top: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-total-label {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2D3748;
+    }
+
+    .modal-total-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #4cb290;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
-<div class="mb-8">
-    <h1 class="text-4xl font-bold text-gray-800 mb-2">
-        <i class="fas fa-shopping-cart mr-3"></i> My Orders
-    </h1>
-    <p class="text-gray-600">Track and manage your orders</p>
+<div class="orders-header">
+    <div class="gradient-box-orders">
+        <h1 class="orders-title">orders</h1>
+    </div>
+    <p class="orders-subtitle">TRACK & MANAGE YOUR ORDERS</p>
 </div>
 
 <!-- Filters -->
-<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+<div class="filter-section">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Status Filter -->
         <div>
-            <label class="block text-gray-700 font-semibold mb-2">Status</label>
+            <label class="filter-label">Status</label>
             <select 
                 id="statusFilter"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                class="filter-select"
                 onchange="loadOrders()"
             >
                 <option value="">All Orders</option>
@@ -34,10 +491,10 @@
         
         <!-- Payment Filter -->
         <div>
-            <label class="block text-gray-700 font-semibold mb-2">Payment Status</label>
+            <label class="filter-label">Payment Status</label>
             <select 
                 id="paymentFilter"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                class="filter-select"
                 onchange="loadOrders()"
             >
                 <option value="">All</option>
@@ -48,10 +505,10 @@
         
         <!-- Sort -->
         <div>
-            <label class="block text-gray-700 font-semibold mb-2">Sort By</label>
+            <label class="filter-label">Sort By</label>
             <select 
                 id="sortFilter"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                class="filter-select"
                 onchange="sortOrders()"
             >
                 <option value="newest">Newest First</option>
@@ -64,19 +521,19 @@
 </div>
 
 <!-- Orders List -->
-<div id="ordersList" class="space-y-6">
+<div id="ordersList">
     <!-- Orders will be loaded here -->
 </div>
 
 <!-- Loading Indicator -->
-<div id="loadingIndicator" class="text-center py-12">
-    <i class="fas fa-spinner fa-spin text-4xl text-primary"></i>
-    <p class="text-gray-600 mt-4">Loading orders...</p>
+<div id="loadingIndicator" class="loading-spinner">
+    <i class="fas fa-spinner spinner-icon"></i>
+    <p style="color: #4A5568; font-weight: 600; margin-top: 1rem;">Loading orders...</p>
 </div>
 
 <!-- Order Details Modal -->
-<div id="orderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+<div id="orderModal" class="hidden modal-overlay">
+    <div class="modal-content">
         <div id="orderDetails">
             <!-- Order details will be loaded here -->
         </div>
@@ -108,9 +565,9 @@
         } catch (error) {
             console.error('Error loading orders:', error);
             document.getElementById('ordersList').innerHTML = `
-                <div class="text-center py-12">
-                    <i class="fas fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
-                    <p class="text-xl text-gray-600">Failed to load orders</p>
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle" style="color: #FF6B6B;"></i>
+                    <p>Failed to load orders</p>
                 </div>
             `;
         } finally {
@@ -147,10 +604,10 @@
         
         if (orders.length === 0) {
             container.innerHTML = `
-                <div class="bg-white rounded-xl shadow-lg p-12 text-center">
-                    <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-xl text-gray-600 mb-6">No orders found</p>
-                    <a href="/menu" class="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition">
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>No orders found</p>
+                    <a href="/menu" class="empty-state-btn">
                         <i class="fas fa-book-open mr-2"></i> Browse Menu
                     </a>
                 </div>
@@ -159,69 +616,65 @@
         }
         
         container.innerHTML = orders.map(order => `
-            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition fade-in">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+            <div class="order-card">
+                <div class="order-header">
                     <div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">
-                            Order #${order.id}
-                        </h3>
-                        <p class="text-gray-600">
+                        <h3 class="order-number">Order #${order.id}</h3>
+                        <p class="order-date">
                             <i class="fas fa-calendar mr-2"></i>
                             ${new Date(order.created_at).toLocaleString()}
                         </p>
                     </div>
-                    <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                    <div class="order-badges">
                         ${getStatusBadge(order.status)}
                         ${order.is_paid ? 
-                            '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold"><i class="fas fa-check-circle mr-1"></i> Paid</span>' :
-                            '<span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold"><i class="fas fa-exclamation-circle mr-1"></i> Unpaid</span>'
+                            '<span class="status-badge badge-paid"><i class="fas fa-check-circle"></i> Paid</span>' :
+                            '<span class="status-badge badge-unpaid"><i class="fas fa-exclamation-circle"></i> Unpaid</span>'
                         }
                     </div>
                 </div>
                 
-                <div class="border-t border-gray-200 pt-4">
-                    <h4 class="font-semibold text-gray-700 mb-3">Items:</h4>
-                    <div class="space-y-2">
+                <div class="order-items">
+                    <h4 class="items-title">Items:</h4>
+                    <div>
                         ${order.items.slice(0, 3).map(item => `
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="text-gray-600">
+                            <div class="item-row">
+                                <span class="item-name">
                                     ${item.quantity}x ${item.menu_item.name}
                                 </span>
-                                <span class="text-gray-800 font-semibold">$${item.subtotal.toFixed(2)}</span>
+                                <span class="item-price">₼${item.subtotal.toFixed(2)}</span>
                             </div>
                         `).join('')}
                         ${order.items.length > 3 ? 
-                            `<p class="text-sm text-gray-500 italic">+${order.items.length - 3} more item(s)</p>` : 
+                            `<p class="more-items">+${order.items.length - 3} more item(s)</p>` : 
                             ''
                         }
                     </div>
                 </div>
                 
                 ${order.special_instructions ? `
-                    <div class="border-t border-gray-200 pt-4 mt-4">
-                        <p class="text-sm text-gray-600">
-                            <i class="fas fa-sticky-note mr-2"></i>
-                            <strong>Note:</strong> ${order.special_instructions}
-                        </p>
+                    <div class="special-note">
+                        <i class="fas fa-sticky-note mr-2"></i>
+                        <strong>Note:</strong> ${order.special_instructions}
                     </div>
                 ` : ''}
                 
-                <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                <div class="order-footer">
                     <div>
-                        <span class="text-gray-600 text-sm">Total:</span>
-                        <span class="text-2xl font-bold text-primary ml-2">$${order.total_price.toFixed(2)}</span>
+                        <span class="total-label">Total:</span>
+                        <span class="total-price">₼${order.total_price.toFixed(2)}</span>
                     </div>
-                    <div class="space-x-2">
+                    <div class="order-actions">
                         <button 
                             onclick="viewOrderDetails(${order.id})"
-                            class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                            class="btn-view"
                         >
                             <i class="fas fa-eye mr-1"></i> View Details
                         </button>
                         ${order.status === 'pending' ? `
                             <button 
                                 onclick="cancelOrder(${order.id})"
-                                class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                                class="btn-cancel"
                             >
                                 <i class="fas fa-times mr-1"></i> Cancel
                             </button>
@@ -235,12 +688,12 @@
     // Get status badge
     function getStatusBadge(status) {
         const badges = {
-            pending: '<span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold"><i class="fas fa-clock mr-1"></i> Pending</span>',
-            confirmed: '<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold"><i class="fas fa-check mr-1"></i> Confirmed</span>',
-            preparing: '<span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold"><i class="fas fa-fire mr-1"></i> Preparing</span>',
-            ready: '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold"><i class="fas fa-check-circle mr-1"></i> Ready</span>',
-            completed: '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold"><i class="fas fa-check-double mr-1"></i> Completed</span>',
-            cancelled: '<span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold"><i class="fas fa-times mr-1"></i> Cancelled</span>'
+            pending: '<span class="status-badge badge-pending"><i class="fas fa-clock"></i> Pending</span>',
+            confirmed: '<span class="status-badge badge-confirmed"><i class="fas fa-check"></i> Confirmed</span>',
+            preparing: '<span class="status-badge badge-preparing"><i class="fas fa-fire"></i> Preparing</span>',
+            ready: '<span class="status-badge badge-ready"><i class="fas fa-check-circle"></i> Ready</span>',
+            completed: '<span class="status-badge badge-completed"><i class="fas fa-check-double"></i> Completed</span>',
+            cancelled: '<span class="status-badge badge-cancelled"><i class="fas fa-times"></i> Cancelled</span>'
         };
         return badges[status] || status;
     }
@@ -254,63 +707,61 @@
             const details = document.getElementById('orderDetails');
             
             details.innerHTML = `
-                <div class="gradient-bg p-6 text-white flex justify-between items-center">
-                    <h2 class="text-2xl font-bold">Order #${order.id}</h2>
-                    <button onclick="closeModal()" class="text-white hover:text-gray-200 text-2xl">
+                <div class="modal-header">
+                    <h2 class="modal-title">Order #${order.id}</h2>
+                    <button onclick="closeModal()" class="modal-close">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 
-                <div class="p-6">
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="modal-body">
+                    <div class="detail-grid">
                         <div>
-                            <p class="text-gray-600 text-sm">Order Date</p>
-                            <p class="font-semibold">${new Date(order.created_at).toLocaleString()}</p>
+                            <p class="detail-item">Order Date</p>
+                            <p class="detail-value">${new Date(order.created_at).toLocaleString()}</p>
                         </div>
                         <div>
-                            <p class="text-gray-600 text-sm">Status</p>
-                            <div class="mt-1">${getStatusBadge(order.status)}</div>
+                            <p class="detail-item">Status</p>
+                            <div class="detail-value">${getStatusBadge(order.status)}</div>
                         </div>
                         <div>
-                            <p class="text-gray-600 text-sm">Payment Status</p>
-                            <p class="font-semibold">${order.is_paid ? '✅ Paid' : '❌ Unpaid'}</p>
+                            <p class="detail-item">Payment Status</p>
+                            <p class="detail-value">${order.is_paid ? '✅ Paid' : '❌ Unpaid'}</p>
                         </div>
                         ${order.payment_method ? `
                             <div>
-                                <p class="text-gray-600 text-sm">Payment Method</p>
-                                <p class="font-semibold">${order.payment_method}</p>
+                                <p class="detail-item">Payment Method</p>
+                                <p class="detail-value">${order.payment_method}</p>
                             </div>
                         ` : ''}
                     </div>
                     
-                    <div class="border-t pt-4">
-                        <h3 class="font-bold text-lg mb-4">Order Items</h3>
-                        <div class="space-y-3">
+                    <div class="items-section">
+                        <h3 class="section-title">Order Items</h3>
+                        <div>
                             ${order.items.map(item => `
-                                <div class="flex justify-between items-center border-b pb-3">
-                                    <div class="flex-1">
-                                        <p class="font-semibold">${item.menu_item.name}</p>
-                                        <p class="text-sm text-gray-600">${item.menu_item.description || ''}</p>
-                                        <p class="text-sm text-gray-500">$${item.unit_price.toFixed(2)} × ${item.quantity}</p>
+                                <div class="modal-item">
+                                    <div class="modal-item-details">
+                                        <p class="modal-item-name">${item.menu_item.name}</p>
+                                        <p class="modal-item-desc">${item.menu_item.description || ''}</p>
+                                        <p class="modal-item-calc">₼${item.unit_price.toFixed(2)} × ${item.quantity}</p>
                                     </div>
-                                    <p class="font-bold text-primary">$${item.subtotal.toFixed(2)}</p>
+                                    <p class="modal-item-price">₼${item.subtotal.toFixed(2)}</p>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                     
                     ${order.special_instructions ? `
-                        <div class="border-t pt-4 mt-4">
-                            <h3 class="font-bold text-lg mb-2">Special Instructions</h3>
-                            <p class="text-gray-700">${order.special_instructions}</p>
+                        <div class="items-section">
+                            <h3 class="section-title">Special Instructions</h3>
+                            <p style="color: #2D3748;">${order.special_instructions}</p>
                         </div>
                     ` : ''}
                     
-                    <div class="border-t pt-4 mt-6">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xl font-bold">Total:</span>
-                            <span class="text-3xl font-bold text-primary">$${order.total_price.toFixed(2)}</span>
-                        </div>
+                    <div class="modal-total">
+                        <span class="modal-total-label">Total:</span>
+                        <span class="modal-total-price">₼${order.total_price.toFixed(2)}</span>
                     </div>
                 </div>
             `;

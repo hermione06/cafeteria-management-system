@@ -1,78 +1,366 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - CafeHub{% endblock %}
+{% block title %}Dashboard - Bounty Cafeteria{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=League+Spartan:wght@100..900&display=swap');
+
+    /* Page Header with Gradient */
+    .dashboard-header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 0;
+        margin-top: 3rem;
+    }
+
+    .gradient-box-dashboard {
+        width: 100%;
+        height: 120px;
+        background: linear-gradient(180deg, #fff963 0%, #ffffff00 100%);
+        border-radius: 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .dashboard-title {
+        font-family: 'League Spartan', sans-serif;
+        font-size: 15rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+        letter-spacing: 8px;
+        margin: 0;
+        position: absolute;
+        top: 3%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .dashboard-subtitle {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #4cb290;
+        letter-spacing: 0.5px;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+        background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+        border-radius: 30px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.3);
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-text {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    /* Stats Cards */
+    .stats-card {
+        background: white;
+        border-radius: 25px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(76, 178, 144, 0.3);
+    }
+
+    .stats-label {
+        color: #4A5568;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .stats-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    /* Color variations for stats */
+    .stats-primary .stats-value { color: #4cb290; }
+    .stats-primary .stats-icon { background: #c6f6d5; color: #4cb290; }
+
+    .stats-warning .stats-value { color: #FFD93D; }
+    .stats-warning .stats-icon { background: #FFF9C4; color: #FFD93D; }
+
+    .stats-success .stats-value { color: #48bb78; }
+    .stats-success .stats-icon { background: #c6f6d5; color: #48bb78; }
+
+    .stats-purple .stats-value { color: #9f7aea; }
+    .stats-purple .stats-icon { background: #e9d8fd; color: #9f7aea; }
+
+    /* Recent Orders Section */
+    .orders-section {
+        background: white;
+        border-radius: 30px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2D3748;
+    }
+
+    .view-all-link {
+        color: #4cb290;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .view-all-link:hover {
+        color: #3da080;
+    }
+
+    /* Quick Actions */
+    .action-card {
+        border-radius: 25px;
+        padding: 2.5rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+        display: block;
+    }
+
+    .action-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .action-card i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .action-card h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-card p {
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+
+    .action-menu {
+        background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+    }
+
+    .action-orders {
+        background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%);
+    }
+
+    .action-profile {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    }
+
+    /* Table Styles */
+    .orders-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .orders-table thead {
+        background: #f7fafc;
+    }
+
+    .orders-table th {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #4A5568;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .orders-table td {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .orders-table tbody tr {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .orders-table tbody tr:hover {
+        background: #f7fafc;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .badge-pending { background: #FFF9C4; color: #F59E0B; }
+    .badge-confirmed { background: #DBEAFE; color: #3B82F6; }
+    .badge-preparing { background: #FED7AA; color: #EA580C; }
+    .badge-ready { background: #c6f6d5; color: #48bb78; }
+    .badge-completed { background: #c6f6d5; color: #22543d; }
+    .badge-cancelled { background: #FEE2E2; color: #DC2626; }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #a0aec0;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state-btn {
+        background: #4cb290;
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        display: inline-block;
+        margin-top: 1rem;
+    }
+
+    .empty-state-btn:hover {
+        background: #3da080;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(76, 178, 144, 0.4);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<!-- Page Header -->
+<div class="dashboard-header">
+    <div class="gradient-box-dashboard">
+        <h1 class="dashboard-title">dashboard</h1>
+    </div>
+    <p class="dashboard-subtitle">MANAGE YOUR ORDERS & ACCOUNT</p>
+</div>
+
 <!-- Welcome Section -->
-<div class="gradient-bg rounded-2xl shadow-2xl p-8 mb-8 text-white">
-    <h1 class="text-3xl font-bold mb-2">
+<div class="welcome-section">
+    <h2 class="welcome-title">
         <i class="fas fa-home mr-3"></i> Welcome back, <span id="userName">User</span>!
-    </h1>
-    <p class="text-white/80">Here's what's happening with your orders</p>
+    </h2>
+    <p class="welcome-text">Here's what's happening with your orders</p>
 </div>
 
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <!-- Total Orders -->
-    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition">
+    <div class="stats-card stats-primary">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Total Orders</p>
-                <p class="text-3xl font-bold text-gray-800" id="totalOrders">0</p>
+                <p class="stats-label">Total Orders</p>
+                <p class="stats-value" id="totalOrders">0</p>
             </div>
-            <div class="bg-blue-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-shopping-cart text-2xl text-primary"></i>
+            <div class="stats-icon">
+                <i class="fas fa-shopping-cart"></i>
             </div>
         </div>
     </div>
     
     <!-- Pending Orders -->
-    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition">
+    <div class="stats-card stats-warning">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Pending</p>
-                <p class="text-3xl font-bold text-yellow-600" id="pendingOrders">0</p>
+                <p class="stats-label">Pending</p>
+                <p class="stats-value" id="pendingOrders">0</p>
             </div>
-            <div class="bg-yellow-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-clock text-2xl text-yellow-600"></i>
+            <div class="stats-icon">
+                <i class="fas fa-clock"></i>
             </div>
         </div>
     </div>
     
     <!-- Completed Orders -->
-    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition">
+    <div class="stats-card stats-success">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Completed</p>
-                <p class="text-3xl font-bold text-green-600" id="completedOrders">0</p>
+                <p class="stats-label">Completed</p>
+                <p class="stats-value" id="completedOrders">0</p>
             </div>
-            <div class="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-check-circle text-2xl text-green-600"></i>
+            <div class="stats-icon">
+                <i class="fas fa-check-circle"></i>
             </div>
         </div>
     </div>
     
     <!-- Total Spent -->
-    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition">
+    <div class="stats-card stats-purple">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Total Spent</p>
-                <p class="text-3xl font-bold text-purple-600">$<span id="totalSpent">0.00</span></p>
+                <p class="stats-label">Total Spent</p>
+                <p class="stats-value">₼<span id="totalSpent">0.00</span></p>
             </div>
-            <div class="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-dollar-sign text-2xl text-purple-600"></i>
+            <div class="stats-icon">
+                <i class="fas fa-dollar-sign"></i>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Recent Orders -->
-<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">
+<div class="orders-section">
+    <div class="section-header">
+        <h2 class="section-title">
             <i class="fas fa-history mr-2"></i> Recent Orders
         </h2>
-        <a href="/orders" class="text-primary hover:text-blue-600 font-semibold">
+        <a href="/orders" class="view-all-link">
             View All <i class="fas fa-arrow-right ml-1"></i>
         </a>
     </div>
@@ -84,22 +372,22 @@
 
 <!-- Quick Actions -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <a href="/menu" class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-8 text-white hover:shadow-2xl transition transform hover:-translate-y-2">
-        <i class="fas fa-book-open text-4xl mb-4"></i>
-        <h3 class="text-xl font-bold mb-2">Browse Menu</h3>
-        <p class="text-white/80">Explore our delicious offerings</p>
+    <a href="/menu" class="action-card action-menu">
+        <i class="fas fa-book-open"></i>
+        <h3>Browse Menu</h3>
+        <p>Explore our delicious offerings</p>
     </a>
     
-    <a href="/orders" class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-8 text-white hover:shadow-2xl transition transform hover:-translate-y-2">
-        <i class="fas fa-list text-4xl mb-4"></i>
-        <h3 class="text-xl font-bold mb-2">My Orders</h3>
-        <p class="text-white/80">Track your order history</p>
+    <a href="/orders" class="action-card action-orders">
+        <i class="fas fa-list"></i>
+        <h3>My Orders</h3>
+        <p>Track your order history</p>
     </a>
     
-    <a href="/profile" class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-8 text-white hover:shadow-2xl transition transform hover:-translate-y-2">
-        <i class="fas fa-user text-4xl mb-4"></i>
-        <h3 class="text-xl font-bold mb-2">My Profile</h3>
-        <p class="text-white/80">Update your information</p>
+    <a href="/profile" class="action-card action-profile">
+        <i class="fas fa-user"></i>
+        <h3>My Account</h3>
+        <p>Update your information</p>
     </a>
 </div>
 {% endblock %}
@@ -145,10 +433,10 @@
         
         if (orders.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-12">
-                    <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 mb-4">No orders yet</p>
-                    <a href="/menu" class="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition">
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p style="font-family: 'Fredoka', sans-serif; font-size: 1.2rem; font-weight: 600;">No orders yet</p>
+                    <a href="/menu" class="empty-state-btn">
                         <i class="fas fa-book-open mr-2"></i> Browse Menu
                     </a>
                 </div>
@@ -158,24 +446,24 @@
         
         container.innerHTML = `
             <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
+                <table class="orders-table">
+                    <thead>
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody>
                         ${orders.map(order => `
-                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="viewOrder(${order.id})">
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900">#${order.id}</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">${new Date(order.created_at).toLocaleDateString()}</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">${order.items.length} item(s)</td>
-                                <td class="px-6 py-4 text-sm font-semibold text-primary">$${order.total_price.toFixed(2)}</td>
-                                <td class="px-6 py-4">
+                            <tr onclick="viewOrder(${order.id})">
+                                <td style="font-weight: 700; color: #2D3748;">#${order.id}</td>
+                                <td style="color: #4A5568;">${new Date(order.created_at).toLocaleDateString()}</td>
+                                <td style="color: #4A5568;">${order.items.length} item(s)</td>
+                                <td style="font-weight: 700; color: #4cb290;">₼${order.total_price.toFixed(2)}</td>
+                                <td>
                                     ${getStatusBadge(order.status)}
                                 </td>
                             </tr>
@@ -189,12 +477,12 @@
     // Get status badge HTML
     function getStatusBadge(status) {
         const badges = {
-            pending: '<span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold"><i class="fas fa-clock mr-1"></i> Pending</span>',
-            confirmed: '<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold"><i class="fas fa-check mr-1"></i> Confirmed</span>',
-            preparing: '<span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold"><i class="fas fa-fire mr-1"></i> Preparing</span>',
-            ready: '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold"><i class="fas fa-check-circle mr-1"></i> Ready</span>',
-            completed: '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold"><i class="fas fa-check-double mr-1"></i> Completed</span>',
-            cancelled: '<span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold"><i class="fas fa-times mr-1"></i> Cancelled</span>'
+            pending: '<span class="status-badge badge-pending"><i class="fas fa-clock mr-1"></i> Pending</span>',
+            confirmed: '<span class="status-badge badge-confirmed"><i class="fas fa-check mr-1"></i> Confirmed</span>',
+            preparing: '<span class="status-badge badge-preparing"><i class="fas fa-fire mr-1"></i> Preparing</span>',
+            ready: '<span class="status-badge badge-ready"><i class="fas fa-check-circle mr-1"></i> Ready</span>',
+            completed: '<span class="status-badge badge-completed"><i class="fas fa-check-double mr-1"></i> Completed</span>',
+            cancelled: '<span class="status-badge badge-cancelled"><i class="fas fa-times mr-1"></i> Cancelled</span>'
         };
         return badges[status] || status;
     }
