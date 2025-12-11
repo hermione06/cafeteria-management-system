@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - CafeHub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+            <i class="fas fa-user-circle mr-3"></i> My Profile
+        </h1>
+        <p class="text-gray-600">Manage your account information</p>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+        <div class="gradient-bg p-8 text-center">
+            <div class="inline-block bg-white rounded-full p-4 mb-4">
+                <i class="fas fa-user-circle text-6xl text-primary"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white" id="profileUsername">Loading...</h2>
+            <p class="text-white/80" id="profileEmail">loading@example.com</p>
+        </div>
+
+        <div class="p-8">
+            <form id="profileForm" class="space-y-6">
+                <!-- Username -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-user mr-2"></i> Username
+                    </label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-envelope mr-2"></i> Email
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                </div>
+
+                <!-- Account Info -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">Role</label>
+                        <input 
+                            type="text" 
+                            id="role" 
+                            disabled
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">Status</label>
+                        <input 
+                            type="text" 
+                            id="status" 
+                            disabled
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100"
+                        >
+                    </div>
+                </div>
+
+                <!-- Update Button -->
+                <button 
+                    type="submit"
+                    class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition transform hover:scale-105"
+                >
+                    <i class="fas fa-save mr-2"></i> Update Profile
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-lock mr-2"></i> Change Password
+        </h2>
+
+        <form id="passwordForm" class="space-y-6">
+            <!-- Current Password -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Current Password</label>
+                <input 
+                    type="password" 
+                    id="oldPassword" 
+                    name="old_password"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+            </div>
+
+            <!-- New Password -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">New Password</label>
+                <input 
+                    type="password" 
+                    id="newPassword" 
+                    name="new_password"
+                    required
+                    minlength="8"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                <p class="text-xs text-gray-500 mt-1">At least 8 characters</p>
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Confirm New Password</label>
+                <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    name="confirm_password"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+            </div>
+
+            <!-- Change Password Button -->
+            <button 
+                type="submit"
+                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+            >
+                <i class="fas fa-key mr-2"></i> Change Password
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentUser = null;
+
+    // Load user profile
+    async function loadProfile() {
+        try {
+            const user = await apiRequest('/auth/me');
+            currentUser = user;
+
+            document.getElementById('profileUsername').textContent = user.username;
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('username').value = user.username;
+            document.getElementById('email').value = user.email;
+            document.getElementById('role').value = user.role.toUpperCase();
+            document.getElementById('status').value = user.is_active ? 'Active' : 'Inactive';
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            showFlash('Please login to view your profile', 'error');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1500);
+        }
+    }
+
+    // Update profile
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+
+        try {
+            await apiRequest(`/users/${currentUser.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ username, email })
+            });
+
+            showFlash('Profile updated successfully', 'success');
+            
+            // Update localStorage
+            const updatedUser = await apiRequest('/auth/me');
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            
+            loadProfile();
+        } catch (error) {
+            console.error('Error updating profile:', error);
+        }
+    });
+
+    // Change password
+    document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const oldPassword = document.getElementById('oldPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (newPassword !== confirmPassword) {
+            showFlash('Passwords do not match', 'error');
+            return;
+        }
+
+        try {
+            await apiRequest('/auth/change-password', {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    old_password: oldPassword, 
+                    new_password: newPassword 
+                })
+            });
+
+            showFlash('Password changed successfully', 'success');
+            document.getElementById('passwordForm').reset();
+        } catch (error) {
+            console.error('Error changing password:', error);
+        }
+    });
+
+    // Load profile on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadProfile();
+    });
+</script>
+{% endblock %}

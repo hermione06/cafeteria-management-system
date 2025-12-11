@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
-basedir = Path(__file__).parent
+basedir = Path(__file__).resolve().parent.parent
 
 
 class Config:
@@ -56,19 +56,17 @@ class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
     TESTING = False
-    
-    # Use PostgreSQL in production
+
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         f'sqlite:///{basedir}/instance/cafeteria.db'
-    
-    # More strict settings for production
+
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    
-    # Force SECRET_KEY to be set
-    if not os.environ.get('SECRET_KEY'):
-        raise ValueError("SECRET_KEY environment variable must be set in production!")
+
+    def __init__(self):
+        if not os.environ.get('SECRET_KEY'):
+            raise ValueError("SECRET_KEY environment variable must be set in production!")
 
 
 # Configuration dictionary

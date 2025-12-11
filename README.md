@@ -314,6 +314,11 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
    - Configure CORS properly
    - Enable security headers
 
+
+
+## Database/Tables
+Just run `sqlitebrowser` in terminal.
+
 ## Environment Variables
 
 See `.env.example` for all available configuration options.

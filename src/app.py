@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template, session, redirect, url_for
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -12,6 +12,7 @@ from routes import register_routes
 def create_app(config_name=None):
     """Application factory pattern"""
     app = Flask(__name__)
+    app.secret_key = 'your-secret-key-here'  # Change in production
     
     # Load configuration
     if config_name is None:
@@ -52,6 +53,63 @@ def create_app(config_name=None):
     @app.route('/health')
     def health():
         return {"status": "healthy", "environment": config_name}, 200
+    
+    # ==================== HTML TEMPLATE ROUTES ====================
+    
+    @app.route('/')
+    def index():
+        """Home page"""
+        return render_template('index.html')
+    
+    @app.route('/login')
+    def login_page():
+        """Login page"""
+        return render_template('login.html')
+    
+    @app.route('/register')
+    def register_page():
+        """Registration page"""
+        return render_template('register.html')
+    
+    @app.route('/menu')
+    def menu_page():
+        """Menu page"""
+        return render_template('menu.html')
+    
+    @app.route('/dashboard')
+    def dashboard():
+        """User dashboard"""
+        return render_template('dashboard.html')
+    
+    @app.route('/orders')
+    def orders_page():
+        """Orders page"""
+        return render_template('orders.html')
+    
+    @app.route('/orders/<int:order_id>')
+    def order_detail(order_id):
+        """Order detail page"""
+        return render_template('orders.html')
+    
+    @app.route('/profile')
+    def profile_page():
+        """User profile page"""
+        return render_template('profile.html')
+    
+    @app.route('/admin/dashboard')
+    def admin_dashboard():
+        """Admin dashboard"""
+        return render_template('admin_dashboard.html')
+    
+    @app.route('/staff/dashboard')
+    def staff_dashboard():
+        """Staff dashboard"""
+        return render_template('staff_dashboard.html')
+    
+    @app.route('/forgot-password')
+    def forgot_password_page():
+        """Forgot password page"""
+        return render_template('forgot_password.html')
     
     return app
 
