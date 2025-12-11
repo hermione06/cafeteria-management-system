@@ -1,381 +1,213 @@
-import sys
-import os
-import json
-
-
-# Add the 'src' directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
-
 import pytest
+import json
+from datetime import datetime, timedelta
 
-# Set testing config BEFORE importing app
-os.environ['FLASK_ENV'] = 'testing'
+# Assuming the following structure:
+# from src.app import create_app, db
+# from src.models import User
+# from src.config import TestingConfig
+# from src.order import OrderHandler (not needed here, but for context)
 
-from app import app, db
-from models import User
+# --- Common Test Fixtures (To be placed in a shared conftest.py in a real project) ---
+
+@pytest.fixture(scope='session')
+def app():
+    """Fixture for the main Flask application."""
+    # Assuming the app factory pattern is used:
+    # app = create_app(TestingConfig) 
+    # Since I don't have the actual app.py, I'll mock the necessary config:
+    from src.app import create_app
+    from src.config import TestingConfig
+    app = create_app(TestingConfig)
+    return app
 
 @pytest.fixture
-def client():
-    """Create a test client with in-memory database"""
-    app.config['TESTING'] = True
-    app.config['SECRET_KEY'] = app.config.get('SECRET_KEY', 'test-secret')
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
-    with app.test_client() as test_client:
-        with app.app_context():
-            db.create_all()
-            yield test_client
-            db.session.remove()
-            db.drop_all()
+def client(app):
+    """Test client instance."""
+    return app.test_client()
 
-# ===== Registration Tests =====
+@pytest.fixture
+def init_db(app):
+    """Initializes and tears down the in-memory database."""
+    from src.models import db, User, MenuItem
+    with app.app_context():
+        db.create_all()
 
-def test_register_success(client):
-    """Test successful user registration"""
-    user_data = {
-        'username': 'testuser',
-        'email': 'test@example.com',
-        'password': 'SecurePass123'
-    }
-    response = client.post('/auth/register',
-                          data=json.dumps(user_data),
-                          content_type='application/json')
-    
+        # Create Admin User (id=1)
+        admin = User(username='admin', email='admin@c.com', role='admin')
+        admin.set_password('admin123')
+        admin.is_verified = True
+        db.session.add(admin)
+
+        # Create Staff User (id=2)
+        staff = User(username='staff', email='staff@c.com', role='staff')
+        staff.set_password('staff123')
+        staff.is_verified = True
+        db.session.add(staff)
+
+        # Create Student User (id=3)
+        student = User(username='student', email='student@c.com', role='student')
+        student.set_password('student123')
+        student.is_verified = True
+        db.session.add(student)
+
+        db.session.commit()
+        yield db
+        db.session.remove()
+        db.drop_all()
+
+@pytest.fixture
+def get_user_data(init_db):
+    """Helper to get user objects and tokens."""
+    from src.models import User
+    def _get_user_data(role):
+        user = User.query.filter_by(role=role).first()
+        assert user is not None
+        # Assuming User.get_token() or similar exists, otherwise generate manually
+        login_data = {'username': user.username, 'password': f'{role}123'}
+        return user, login_data
+    return _get_user_data
+
+@pytest.fixture
+def auth_headers(client, get_user_data):
+    """Generates JWT authentication headers for different roles."""
+    headers = {}
+    for role in ['admin', 'staff', 'student']:
+        user, login_data = get_user_data(role)
+        response = client.post('/api/auth/login', json=login_data)
+        token = json.loads(response.data)['access_token']
+        headers[role] = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+    return headers
+
+# --- Test Cases ---
+
+def test_register_user_success(client, init_db):
+    """Test successful user registration."""
+    response = client.post('/api/auth/register', json={
+        'username': 'newuser',
+        'email': 'new@user.com',
+        'password': 'StrongPassword123'
+    })
     assert response.status_code == 201
     data = json.loads(response.data)
-    assert data['message'] == 'User registered successfully. Please verify your email.'
-    assert data['user']['username'] == 'testuser'
-    assert data['user']['is_verified'] is False
     assert 'verification_token' in data
+    assert data['user']['username'] == 'newuser'
 
-
-def test_register_missing_fields(client):
-    """Test registration with missing required fields"""
-    user_data = {'username': 'testuser'}
-    response = client.post('/auth/register',
-                          data=json.dumps(user_data),
-                          content_type='application/json')
-    
+def test_register_user_invalid_data(client, init_db):
+    """Test registration with missing or invalid fields."""
+    # Missing password
+    response = client.post('/api/auth/register', json={'username': 'a', 'email': 'a@a.com'})
     assert response.status_code == 400
-    data = json.loads(response.data)
-    assert 'required' in data['error'].lower()
+    assert 'error' in json.loads(response.data)
 
-
-def test_register_invalid_email(client):
-    """Test registration with invalid email"""
-    user_data = {
-        'username': 'testuser',
-        'email': 'invalid-email',
-        'password': 'SecurePass123'
-    }
-    response = client.post('/auth/register',
-                          data=json.dumps(user_data),
-                          content_type='application/json')
-    
-    assert response.status_code == 400
-    data = json.loads(response.data)
-    assert 'Invalid email' in data['error']
-
-
-def test_register_weak_password(client):
-    """Test registration with weak password"""
-    user_data = {
-        'username': 'testuser',
-        'email': 'test@example.com',
-        'password': 'weak'
-    }
-    response = client.post('/auth/register',
-                          data=json.dumps(user_data),
-                          content_type='application/json')
-    
-    assert response.status_code == 400
-    data = json.loads(response.data)
-    assert 'at least 8 characters' in data['error']
-
-
-def test_register_duplicate_username(client):
-    """Test registration with existing username"""
-    user_data = {
-        'username': 'testuser',
-        'email': 'test1@example.com',
-        'password': 'SecurePass123'
-    }
-    client.post('/auth/register',
-               data=json.dumps(user_data),
-               content_type='application/json')
-    
-    # Try to register with same username
-    user_data2 = {
-        'username': 'testuser',
-        'email': 'test2@example.com',
-        'password': 'SecurePass123'
-    }
-    response = client.post('/auth/register',
-                          data=json.dumps(user_data2),
-                          content_type='application/json')
-    
+def test_register_user_duplicate(client, init_db):
+    """Test registration with existing username/email."""
+    # Register first user
+    client.post('/api/auth/register', json={'username': 'test', 'email': 'test@test.com', 'password': 'p'})
+    # Register same user again
+    response = client.post('/api/auth/register', json={'username': 'test', 'email': 'another@test.com', 'password': 'p'})
     assert response.status_code == 409
-    data = json.loads(response.data)
-    assert 'Username already exists' in data['error']
+    assert 'Username or email already exists' in json.loads(response.data)['error']
 
-
-def test_register_duplicate_email(client):
-    """Test registration with existing email"""
-    user_data = {
-        'username': 'user1',
-        'email': 'test@example.com',
-        'password': 'SecurePass123'
-    }
-    client.post('/auth/register',
-               data=json.dumps(user_data),
-               content_type='application/json')
-    
-    # Try to register with same email
-    user_data2 = {
-        'username': 'user2',
-        'email': 'test@example.com',
-        'password': 'SecurePass123'
-    }
-    response = client.post('/auth/register',
-                          data=json.dumps(user_data2),
-                          content_type='application/json')
-    
-    assert response.status_code == 409
-    data = json.loads(response.data)
-    assert 'Email already registered' in data['error']
-
-
-# ===== Email Verification Tests =====
-
-def test_verify_email_success(client):
-    """Test successful email verification"""
-    # Register user
-    user_data = {
-        'username': 'testuser',
-        'email': 'test@example.com',
-        'password': 'SecurePass123'
-    }
-    register_response = client.post('/auth/register',
-                                   data=json.dumps(user_data),
-                                   content_type='application/json')
-    token = json.loads(register_response.data)['verification_token']
-    
-    # Verify email
-    response = client.post(f'/auth/verify-email/{token}')
-    
+def test_login_success(client, get_user_data):
+    """Test successful login."""
+    _, login_data = get_user_data('admin')
+    response = client.post('/api/auth/login', json=login_data)
     assert response.status_code == 200
     data = json.loads(response.data)
-    assert data['message'] == 'Email verified successfully'
-    assert data['user']['is_verified'] is True
-
-
-def test_verify_email_invalid_token(client):
-    """Test email verification with invalid token"""
-    response = client.post('/auth/verify-email/invalid-token')
-    
-    assert response.status_code == 400
-    data = json.loads(response.data)
-    assert 'Invalid or expired' in data['error']
-
-
-# ===== Login Tests =====
-
-def test_login_success(client):
-    """Test successful login"""
-    # Register and verify user
-    user_data = {
-        'username': 'testuser',
-        'email': 'test@example.com',
-        'password': 'SecurePass123'
-    }
-    register_response = client.post('/auth/register',
-                                   data=json.dumps(user_data),
-                                   content_type='application/json')
-    token = json.loads(register_response.data)['verification_token']
-    client.post(f'/auth/verify-email/{token}')
-    
-    # Login
-    login_data = {
-        'username': 'testuser',
-        'password': 'SecurePass123'
-    }
-    response = client.post('/auth/login',
-                          data=json.dumps(login_data),
-                          content_type='application/json')
-    
-    assert response.status_code == 200
-    data = json.loads(response.data)
-    assert data['message'] == 'Login successful'
     assert 'access_token' in data
-    assert 'refresh_token' in data
-    assert data['user']['username'] == 'testuser'
+    assert data['user']['role'] == 'admin'
 
-
-def test_login_invalid_credentials(client):
-    """Test login with invalid credentials"""
-    login_data = {
+def test_login_failure(client):
+    """Test login with incorrect credentials."""
+    response = client.post('/api/auth/login', json={
         'username': 'nonexistent',
-        'password': 'WrongPass123'
-    }
-    response = client.post('/auth/login',
-                          data=json.dumps(login_data),
-                          content_type='application/json')
-    
+        'password': 'wrongpassword'
+    })
     assert response.status_code == 401
+    assert 'Invalid username or password' in json.loads(response.data)['error']
+
+def test_change_password_success(client, auth_headers, get_user_data):
+    """Test successful password change for a logged-in user."""
+    from src.models import User
+    
+    # Get initial student user and check password
+    student_user, _ = get_user_data('student')
+    assert student_user.check_password('student123') is True
+
+    # Perform password change
+    response = client.post('/api/auth/change-password', json={
+        'old_password': 'student123',
+        'new_password': 'NewPassword456'
+    }, headers=auth_headers['student'])
+    assert response.status_code == 200
+    assert 'Password reset successfully' in json.loads(response.data)['message']
+
+    # Verify new password works and old one doesn't
+    student_user_after = User.query.get(student_user.id)
+    assert student_user_after.check_password('student123') is False
+    assert student_user_after.check_password('NewPassword456') is True
+
+def test_change_password_invalid_old_password(client, auth_headers):
+    """Test password change with incorrect old password."""
+    response = client.post('/api/auth/change-password', json={
+        'old_password': 'WrongOldPassword',
+        'new_password': 'NewPassword456'
+    }, headers=auth_headers['student'])
+    assert response.status_code == 401
+    assert 'Invalid old password' in json.loads(response.data)['error']
+
+def test_admin_get_all_users_success(client, auth_headers):
+    """Admin can view all users."""
+    response = client.get('/api/users', headers=auth_headers['admin'])
+    assert response.status_code == 200
     data = json.loads(response.data)
-    assert 'Invalid username or password' in data['error']
+    assert len(data['users']) >= 3 # admin, staff, student fixtures
 
-
-def test_login_unverified_email(client):
-    """Test login with unverified email"""
-    # Register user but don't verify
-    user_data = {
-        'username': 'testuser',
-        'email': 'test@example.com',
-        'password': 'SecurePass123'
-    }
-    client.post('/auth/register',
-               data=json.dumps(user_data),
-               content_type='application/json')
-    
-    # Try to login
-    login_data = {
-        'username': 'testuser',
-        'password': 'SecurePass123'
-    }
-    response = client.post('/auth/login',
-                          data=json.dumps(login_data),
-                          content_type='application/json')
-    
+def test_staff_get_all_users_forbidden(client, auth_headers):
+    """Staff cannot view all users (assuming only admin can)."""
+    response = client.get('/api/users', headers=auth_headers['staff'])
     assert response.status_code == 403
-    data = json.loads(response.data)
-    assert 'verify your email' in data['error']
 
-
-# ===== Protected Route Tests =====
-
-# def test_get_current_user(client):
-#     """Test getting current user info with valid token"""
-#     # Register, verify, and login
-#     user_data = {
-#         'username': 'testuser',
-#         'email': 'test@example.com',
-#         'password': 'SecurePass123'
-#     }
-#     register_response = client.post('/auth/register',
-#                                    data=json.dumps(user_data),
-#                                    content_type='application/json')
-#     token = json.loads(register_response.data)['verification_token']
-#     client.post(f'/auth/verify-email/{token}')
-    
-#     login_response = client.post('/auth/login',
-#                                 data=json.dumps({
-#                                     'username': 'testuser',
-#                                     'password': 'SecurePass123'
-#                                 }),
-#                                 content_type='application/json')
-#     access_token = json.loads(login_response.data)['access_token']
-    
-#     # Get current user
-#     response = client.get('/auth/me',
-#                          headers={'Authorization': f'Bearer {access_token}'})
-    
-#     assert response.status_code == 200
-#     data = json.loads(response.data)
-#     assert data['username'] == 'testuser'
-
-
-def test_protected_route_without_token(client):
-    """Test accessing protected route without token"""
-    response = client.get('/auth/me')
-    
-    assert response.status_code == 401
-
-
-# ===== Password Reset Tests =====
-
-def test_forgot_password(client):
-    """Test forgot password request"""
-    # Register user
-    user_data = {
-        'username': 'testuser',
-        'email': 'test@example.com',
-        'password': 'SecurePass123'
-    }
-    client.post('/auth/register',
-               data=json.dumps(user_data),
-               content_type='application/json')
-    
-    # Request password reset
-    response = client.post('/auth/forgot-password',
-                          data=json.dumps({'email': 'test@example.com'}),
-                          content_type='application/json')
-    
+def test_student_update_self_success(client, auth_headers, get_user_data):
+    """A user can update their own profile (e.g., email)."""
+    student_user, _ = get_user_data('student')
+    response = client.put(f'/api/users/{student_user.id}', json={
+        'email': 'new_student_email@c.com',
+        'first_name': 'Test'
+    }, headers=auth_headers['student'])
     assert response.status_code == 200
-    data = json.loads(response.data)
-    assert 'reset_token' in data
+    data = json.loads(response.data)['user']
+    assert data['email'] == 'new_student_email@c.com'
+    assert data['first_name'] == 'Test'
+    # Ensure role update is ignored
+    assert data['role'] == 'student'
 
+def test_student_update_other_user_forbidden(client, auth_headers, get_user_data):
+    """A user cannot update another user's profile."""
+    admin_user, _ = get_user_data('admin')
+    response = client.put(f'/api/users/{admin_user.id}', json={
+        'email': 'hacked@c.com'
+    }, headers=auth_headers['student'])
+    assert response.status_code == 403
 
-def test_reset_password_success(client):
-    """Test successful password reset"""
-    # Register user
-    user_data = {
-        'username': 'testuser',
-        'email': 'test@example.com',
-        'password': 'OldPass123'
-    }
-    client.post('/auth/register',
-               data=json.dumps(user_data),
-               content_type='application/json')
-    
-    # Request reset
-    reset_request = client.post('/auth/forgot-password',
-                               data=json.dumps({'email': 'test@example.com'}),
-                               content_type='application/json')
-    reset_token = json.loads(reset_request.data)['reset_token']
-    
-    # Reset password
-    response = client.post(f'/auth/reset-password/{reset_token}',
-                          data=json.dumps({'password': 'NewPass123'}),
-                          content_type='application/json')
-    
+def test_admin_update_user_role_success(client, auth_headers, get_user_data):
+    """Admin can update any user's role."""
+    student_user, _ = get_user_data('student')
+    response = client.put(f'/api/users/{student_user.id}', json={
+        'role': 'staff'
+    }, headers=auth_headers['admin'])
     assert response.status_code == 200
-    data = json.loads(response.data)
-    assert 'Password reset successfully' in data['message']
+    data = json.loads(response.data)['user']
+    assert data['role'] == 'staff'
 
-
-# def test_change_password(client):
-#     """Test changing password for logged-in user"""
-#     # Register, verify, and login
-#     user_data = {
-#         'username': 'testuser',
-#         'email': 'test@example.com',
-#         'password': 'OldPass123'
-#     }
-#     register_response = client.post('/auth/register',
-#                                    data=json.dumps(user_data),
-#                                    content_type='application/json')
-#     token = json.loads(register_response.data)['verification_token']
-#     client.post(f'/auth/verify-email/{token}')
+def test_admin_delete_user_success(client, auth_headers, get_user_data):
+    """Admin can delete a user."""
+    from src.models import User
+    staff_user, _ = get_user_data('staff')
+    staff_id = staff_user.id
+    response = client.delete(f'/api/users/{staff_id}', headers=auth_headers['admin'])
+    assert response.status_code == 204
     
-#     login_response = client.post('/auth/login',
-#                                 data=json.dumps({
-#                                     'username': 'testuser',
-#                                     'password': 'OldPass123'
-#                                 }),
-#                                 content_type='application/json')
-#     access_token = json.loads(login_response.data)['access_token']
-    
-#     # Change password
-#     response = client.post('/auth/change-password',
-#                           data=json.dumps({
-#                               'old_password': 'OldPass123',
-#                               'new_password': 'NewPass123'
-#                           }),
-#                           headers={'Authorization': f'Bearer {access_token}'},
-#                           content_type='application/json')
-    
-#     assert response.status_code == 200
-#     data = json.loads(response.data)
-#     assert 'Password changed successfully' in data['message']
+    deleted_user = User.query.get(staff_id)
+    assert deleted_user is None

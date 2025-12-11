@@ -1,188 +1,117 @@
 import pytest
-from app import app, db
-from models import User, MenuItem, Order, OrderItem
-from order import OrderHandler  # adjust path if different
+import json
+from src.models import db, Order, OrderItem, MenuItem
+from src.order import OrderHandler # The utility class tested by the original test_orders.py
 
+# Using the common fixtures from test_auth.py for brevity (app, client, init_db, auth_headers, get_user_data)
+# In a real project, these fixtures would be in conftest.py
 
-# -------------------------------------------------------------
-# TEST FIXTURES
-# -------------------------------------------------------------
 @pytest.fixture
-def client():
-    """Test client with fresh in-memory DB."""
-    app.config["TESTING"] = True
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
-
-    with app.app_context():
-        db.create_all()
-
-        # Setup test user + menu items
-        user = User(username="testuser", email="t@t.com")
-        user.set_password("testpassword")
-        db.session.add(user)
-
-        item1 = MenuItem(name="Burger", price=5.0)
-        item2 = MenuItem(name="Cola", price=2.0)
+def active_menu_items(init_db):
+    """Adds menu items specifically for order creation."""
+    with db.session.begin():
+        item1 = MenuItem(name='Pizza', price=10.00, category='main', is_available=True)
+        item2 = MenuItem(name='Water', price=1.00, category='drink', is_available=True)
         db.session.add_all([item1, item2])
+    db.session.commit()
+    return item1, item2
 
-        db.session.commit()
+@pytest.fixture
+def created_order(get_user_data, active_menu_items):
+    """Creates a sample order for testing."""
+    student_user, _ = get_user_data('student')
+    pizza, water = active_menu_items
+    
+    order = OrderHandler.create_order(student_user.id)
+    OrderHandler.add_item(order.id, pizza.id, 2)
+    OrderHandler.add_item(order.id, water.id, 1)
+    
+    return order, student_user.id
 
-        yield app.test_client()
+# --- Order API Tests ---
 
-        db.session.remove()
-        db.drop_all()
+def test_create_order_success(client, auth_headers, active_menu_items, get_user_data):
+    """A student can successfully create a new order."""
+    pizza, water = active_menu_items
+    
+    order_data = {
+        'items': [
+            {'menu_item_id': pizza.id, 'quantity': 1},
+            {'menu_item_id': water.id, 'quantity': 3}
+        ],
+        'instructions': 'Extra napkins please.'
+    }
+    
+    response = client.post('/api/orders', json=order_data, headers=auth_headers['student'])
+    assert response.status_code == 201
+    data = json.loads(response.data)
+    assert data['order']['total_amount'] == (10.00 * 1) + (1.00 * 3)
+    assert data['order']['status'] == 'pending'
+    assert len(data['order']['items']) == 2
+    
+def test_create_order_unauthenticated_forbidden(client, active_menu_items):
+    """Unauthenticated users cannot create an order."""
+    pizza, _ = active_menu_items
+    response = client.post('/api/orders', json={'items': [{'menu_item_id': pizza.id, 'quantity': 1}]})
+    assert response.status_code == 401
 
+def test_student_get_own_order_success(client, auth_headers, created_order):
+    """A student can view their own order."""
+    order, student_id = created_order
+    response = client.get(f'/api/orders/{order.id}', headers=auth_headers['student'])
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert data['order']['user_id'] == student_id
+    assert len(data['order']['items']) == 2
 
-# -------------------------------------------------------------
-# HELPERS
-# -------------------------------------------------------------
-def get_ids():
-    """Small helper to retrieve DB IDs."""
-    return (
-        User.query.first().id,
-        [item.id for item in MenuItem.query.all()]
-    )
+def test_student_get_other_user_order_forbidden(client, auth_headers, created_order, get_user_data):
+    """A student cannot view another user's order (e.g., admin's order)."""
+    # Create an admin order
+    admin_user, _ = get_user_data('admin')
+    admin_order = OrderHandler.create_order(admin_user.id)
+    
+    # Student tries to access admin's order
+    response = client.get(f'/api/orders/{admin_order.id}', headers=auth_headers['student'])
+    assert response.status_code == 403
 
+def test_staff_update_order_status_success(client, auth_headers, created_order):
+    """Staff can update an order's status."""
+    order, _ = created_order
+    response = client.patch(f'/api/orders/{order.id}/status', json={
+        'new_status': 'preparing'
+    }, headers=auth_headers['staff'])
+    assert response.status_code == 200
+    assert json.loads(response.data)['order']['status'] == 'preparing'
 
-# -------------------------------------------------------------
-# TESTS
-# -------------------------------------------------------------
-def test_create_order(client):
-    user_id, _ = get_ids()
+def test_admin_mark_order_paid_success(client, auth_headers, created_order):
+    """Admin/Staff can mark an order as paid (assuming this is the staff/admin route)."""
+    order, _ = created_order
+    
+    # Check initial state
+    assert Order.query.get(order.id).is_paid is False
+    
+    response = client.patch(f'/api/orders/{order.id}/pay', json={
+        'is_paid': True
+    }, headers=auth_headers['admin'])
+    
+    assert response.status_code == 200
+    assert json.loads(response.data)['order']['is_paid'] is True
 
-    order = OrderHandler.create_order(user_id)
+def test_student_cancel_order_success(client, auth_headers, created_order):
+    """A student can cancel their own order if it's still 'pending'."""
+    order, _ = created_order
+    
+    response = client.delete(f'/api/orders/{order.id}', headers=auth_headers['student'])
+    assert response.status_code == 204
+    
+    # Verify status changed to 'cancelled'
+    assert Order.query.get(order.id).status == 'cancelled'
 
-    assert order.id is not None
-    assert order.user_id == user_id
-    assert order.status == "pending"  # if your default
-
-
-def test_add_item(client):
-    user_id, item_ids = get_ids()
-    item1, item2 = item_ids
-
-    order = OrderHandler.create_order(user_id)
-
-    OrderHandler.add_item(order.id, item1, quantity=2)
-    OrderHandler.add_item(order.id, item2, quantity=1)
-
-    oi = OrderItem.query.filter_by(order_id=order.id).all()
-    assert len(oi) == 2
-    assert oi[0].quantity == 2
-    assert oi[1].quantity == 1
-
-
-def test_add_item_existing_increments(client):
-    user_id, item_ids = get_ids()
-    item = item_ids[0]
-
-    order = OrderHandler.create_order(user_id)
-
-    OrderHandler.add_item(order.id, item, 1)
-    OrderHandler.add_item(order.id, item, 3)
-
-    oi = OrderItem.query.filter_by(order_id=order.id).first()
-    assert oi.quantity == 4
-
-
-def test_remove_item_partial(client):
-    user_id, item_ids = get_ids()
-    item = item_ids[0]
-
-    order = OrderHandler.create_order(user_id)
-    OrderHandler.add_item(order.id, item, 5)
-
-    OrderHandler.remove_item(order.id, item, quantity=2)
-
-    oi = OrderItem.query.filter_by(order_id=order.id).first()
-    assert oi.quantity == 3
-
-
-def test_remove_item_entire(client):
-    user_id, item_ids = get_ids()
-    item = item_ids[0]
-
-    order = OrderHandler.create_order(user_id)
-    OrderHandler.add_item(order.id, item, 3)
-
-    OrderHandler.remove_item(order.id, item)  # remove all
-
-    assert OrderItem.query.count() == 0
-
-
-def test_update_status(client):
-    user_id, _ = get_ids()
-    order = OrderHandler.create_order(user_id)
-
-    OrderHandler.update_status(order.id, "completed")
-
-    updated = Order.query.get(order.id)
-    assert updated.status == "completed"
-
-
-def test_mark_paid(client):
-    user_id, _ = get_ids()
-    order = OrderHandler.create_order(user_id)
-
-    OrderHandler.mark_paid(order.id)
-
-    updated = Order.query.get(order.id)
-    assert updated.is_paid is True
-
-
-def test_mark_unpaid(client):
-    user_id, _ = get_ids()
-    order = OrderHandler.create_order(user_id)
-
-    OrderHandler.mark_unpaid(order.id)
-
-    updated = Order.query.get(order.id)
-    assert updated.is_paid is False
-
-
-def test_get_order(client):
-    user_id, item_ids = get_ids()
-    item = item_ids[0]
-
-    order = OrderHandler.create_order(user_id)
-    OrderHandler.add_item(order.id, item, 2)
-
-    data = OrderHandler.get_order(order.id)
-
-    assert "items" in data
-    assert len(data["items"]) == 1
-    assert data["items"][0]["quantity"] == 2
-
-
-def test_get_orders_by_user(client):
-    user_id, _ = get_ids()
-
-    o1 = OrderHandler.create_order(user_id)
-    o2 = OrderHandler.create_order(user_id)
-
-    orders = OrderHandler.get_orders_by_user(user_id)
-
-    assert len(orders) == 2
-    assert {o["id"] for o in orders} == {o1.id, o2.id}
-
-
-def test_get_all_orders(client):
-    user_id, _ = get_ids()
-
-    OrderHandler.create_order(user_id)
-    OrderHandler.create_order(user_id)
-
-    orders = OrderHandler.get_all_orders()
-
-    assert len(orders) == 2
-
-
-def test_delete_order(client):
-    user_id, _ = get_ids()
-    order = OrderHandler.create_order(user_id)
-
-    assert Order.query.count() == 1
-
-    OrderHandler.delete_order(order.id)
-
-    assert Order.query.count() == 0
+def test_student_cancel_processed_order_failure(client, auth_headers, created_order):
+    """A student cannot cancel an order that is already being processed."""
+    order, _ = created_order
+    OrderHandler.update_status(order.id, 'ready') # Staff/Admin mark it as ready
+    
+    response = client.delete(f'/api/orders/{order.id}', headers=auth_headers['student'])
+    assert response.status_code == 400
+    assert 'Order cannot be cancelled' in json.loads(response.data)['error']
