@@ -10,7 +10,7 @@ import pytest
 # Set testing config BEFORE importing app
 os.environ['FLASK_ENV'] = 'testing'
 
-from app import app, db
+from app import create_app, db
 from models import User
 
 @pytest.fixture

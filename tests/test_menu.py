@@ -1,9 +1,5 @@
 import pytest
 import json
-
-# Using the common fixtures from test_auth.py for brevity (app, client, init_db, auth_headers)
-# In a real project, these fixtures would be in conftest.py
-
 @pytest.fixture
 def menu_items(init_db):
     """Adds initial menu items to the database."""
