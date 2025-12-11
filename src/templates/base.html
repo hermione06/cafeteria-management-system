@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cafeteria Management System{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#8b5cf6',
+                        accent: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2">
+                        <i class="fas fa-utensils text-primary text-2xl"></i>
+                        <span class="text-xl font-bold text-gray-800">CafeHub</span>
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    {% if session.user_id %}
+                        <a href="/dashboard" class="text-gray-700 hover:text-primary transition">
+                            <i class="fas fa-home mr-1"></i> Dashboard
+                        </a>
+                        <a href="/menu" class="text-gray-700 hover:text-primary transition">
+                            <i class="fas fa-book-open mr-1"></i> Menu
+                        </a>
+                        <a href="/orders" class="text-gray-700 hover:text-primary transition">
+                            <i class="fas fa-shopping-cart mr-1"></i> Orders
+                        </a>
+                        {% if session.role == 'admin' %}
+                        <a href="/admin" class="text-gray-700 hover:text-primary transition">
+                            <i class="fas fa-cog mr-1"></i> Admin
+                        </a>
+                        {% endif %}
+                        <div class="relative" id="userMenu">
+                            <button class="flex items-center space-x-2 text-gray-700 hover:text-primary transition" onclick="toggleUserMenu()">
+                                <i class="fas fa-user-circle text-2xl"></i>
+                                <span>{{ session.username }}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                                <a href="/profile" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user mr-2"></i> Profile
+                                </a>
+                                <a href="/settings" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-cog mr-2"></i> Settings
+                                </a>
+                                <hr class="my-1">
+                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                                </button>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="/menu" class="text-gray-700 hover:text-primary transition">
+                            <i class="fas fa-book-open mr-1"></i> Menu
+                        </a>
+                        <a href="/login" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
+                            Login
+                        </a>
+                        <a href="/register" class="border border-primary text-primary px-4 py-2 rounded-md hover:bg-primary hover:text-white transition">
+                            Sign Up
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div id="flashMessages" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">CafeHub</h3>
+                    <p class="text-gray-400">Your campus cafeteria management solution.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/menu" class="hover:text-white transition">Menu</a></li>
+                        <li><a href="/about" class="hover:text-white transition">About Us</a></li>
+                        <li><a href="/contact" class="hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Contact</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><i class="fas fa-envelope mr-2"></i> info@cafehub.com</li>
+                        <li><i class="fas fa-phone mr-2"></i> +1 234 567 8900</li>
+                        <li><i class="fas fa-map-marker-alt mr-2"></i> Campus Building A</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 CafeHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Global API base URL
+        const API_BASE = '/api';
+        
+        // Get token from localStorage
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+        
+        // Set token in localStorage
+        function setToken(token) {
+            localStorage.setItem('access_token', token);
+        }
+        
+        // Remove token
+        function removeToken() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+        }
+        
+        // Toggle user menu
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (userMenu && dropdown && !userMenu.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+        
+        // Logout function
+        async function logout() {
+            try {
+                const token = getToken();
+                if (token) {
+                    await fetch(`${API_BASE}/auth/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                removeToken();
+                window.location.href = '/login';
+            }
+        }
+        
+        // Show flash message
+        function showFlash(message, type = 'info') {
+            const container = document.getElementById('flashMessages');
+            const id = 'flash-' + Date.now();
+            
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+            
+            const flash = document.createElement('div');
+            flash.id = id;
+            flash.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 fade-in min-w-[300px]`;
+            flash.innerHTML = `
+                <i class="fas ${icons[type]}"></i>
+                <span class="flex-1">${message}</span>
+                <button onclick="document.getElementById('${id}').remove()" class="text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(flash);
+            
+            setTimeout(() => {
+                flash.remove();
+            }, 5000);
+        }
+        
+        // API request helper with auth
+        async function apiRequest(endpoint, options = {}) {
+            const token = getToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    ...options,
+                    headers
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+                
+                return data;
+            } catch (error) {
+                showFlash(error.message, 'error');
+                throw error;
+            }
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
