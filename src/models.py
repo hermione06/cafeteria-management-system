@@ -92,7 +92,6 @@ class User(db.Model):
         valid_roles = ['user', 'admin', 'staff']
         return role in valid_roles
 
-
 class MenuItem(db.Model):
     """Menu item model"""
     __tablename__ = 'menu_items'
@@ -125,18 +124,18 @@ class MenuItem(db.Model):
         return f'<MenuItem {self.name}>'
     
     def to_dict(self):
-        """Convert menu item to dictionary"""
+        """Convert menu item to dictionary - handles None values"""
         return {
             'id': self.id,
             'name': self.name,
-            'description': self.description,
-            'price': self.price,
+            'description': self.description or '',  # ✅ Handle None
+            'price': float(self.price) if self.price is not None else 0.0,
             'category': self.category,
-            'image_url': self.image_url,
-            'is_available': self.is_available,
-            'stock_quantity': self.stock_quantity,
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat()
+            'image_url': self.image_url or '',  # ✅ Handle None
+            'is_available': bool(self.is_available),
+            'stock_quantity': self.stock_quantity if self.stock_quantity is not None else 0,  # ✅ Handle None
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
     
     @staticmethod
@@ -144,8 +143,7 @@ class MenuItem(db.Model):
         """Validate menu item category"""
         valid_categories = ['beverages', 'food', 'snacks', 'desserts']
         return category.lower() in valid_categories
-
-
+    
 class Order(db.Model):
     """Order model"""
     __tablename__ = 'orders'

@@ -1,20 +1,36 @@
 // api.js - Common API helper functions
 
 /**
+ * Get JWT token from localStorage
+ */
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+/**
  * Generic fetch wrapper with error handling
  */
 async function apiRequest(url, options = {}) {
   try {
+    const token = getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+    
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-      },
+      headers,
       ...options
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
     return await response.json();
@@ -47,6 +63,16 @@ async function apiPost(url, data) {
 async function apiPut(url, data) {
   return apiRequest(url, {
     method: 'PUT',
+    body: JSON.stringify(data)
+  });
+}
+
+/**
+ * PATCH request
+ */
+async function apiPatch(url, data) {
+  return apiRequest(url, {
+    method: 'PATCH',
     body: JSON.stringify(data)
   });
 }

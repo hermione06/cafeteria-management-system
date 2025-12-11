@@ -2,7 +2,8 @@
 
 async function loadMenu() {
   try {
-    await Menu.load();
+    // Students only see available items
+    await Menu.load({ available: 'true' });
     Menu.displayStudent('menu-container');
     Cart.updateCount();
   } catch (error) {

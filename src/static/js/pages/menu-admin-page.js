@@ -2,7 +2,8 @@
 
 async function loadMenu() {
   try {
-    await Menu.load();
+    // Admin can see all items (available and unavailable)
+    await Menu.load({ available: 'false' });
     Menu.displayAdmin('menu-container');
   } catch (error) {
     console.error('Error loading menu:', error);

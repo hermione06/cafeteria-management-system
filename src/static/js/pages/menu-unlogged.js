@@ -2,7 +2,8 @@
 
 async function loadMenu() {
   try {
-    await Menu.load();
+    // Load only available items for unlogged users
+    await Menu.load({ available: 'true' });
     Menu.displayBasic('menu-container');
   } catch (error) {
     console.error('Error loading menu:', error);

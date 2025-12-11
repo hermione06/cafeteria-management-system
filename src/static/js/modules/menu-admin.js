@@ -16,21 +16,28 @@ const MenuAdmin = (() => {
   /**
    * Edit item
    */
-  function edit(dishId) {
-    const dish = Menu.getDishById(dishId);
+  function edit(itemId) {
+    const item = Menu.getItemById(itemId);
     
-    if (!dish) {
-      showAlert('Dish not found!', 'error');
+    if (!item) {
+      showAlert('Menu item not found!', 'error');
       return;
     }
     
     document.getElementById('modal-title').textContent = 'Edit Menu Item';
-    document.getElementById('item-id').value = dish.dish_id;
-    document.getElementById('item-name').value = dish.name;
-    document.getElementById('item-description').value = dish.description || '';
-    document.getElementById('item-price').value = dish.price;
-    document.getElementById('item-picture').value = dish.picture_link || '';
-    document.getElementById('item-available').checked = dish.is_available;
+    document.getElementById('item-id').value = item.id;
+    document.getElementById('item-name').value = item.name;
+    document.getElementById('item-description').value = item.description || '';
+    document.getElementById('item-price').value = item.price;
+    document.getElementById('item-category').value = item.category || '';
+    document.getElementById('item-picture').value = item.image_url || '';
+    document.getElementById('item-available').checked = item.is_available;
+    
+    // Optional: stock_quantity if you're using it
+    if (document.getElementById('item-stock')) {
+      document.getElementById('item-stock').value = item.stock_quantity || 0;
+    }
+    
     Modal.show('item-modal');
   }
 
@@ -40,21 +47,29 @@ const MenuAdmin = (() => {
   async function save(event) {
     event.preventDefault();
     
-    const dishId = document.getElementById('item-id').value;
+    const itemId = document.getElementById('item-id').value;
     const itemData = {
       name: document.getElementById('item-name').value,
       description: document.getElementById('item-description').value,
       price: parseFloat(document.getElementById('item-price').value),
-      picture_link: document.getElementById('item-picture').value || null,
+      category: document.getElementById('item-category').value.toLowerCase(),
+      image_url: document.getElementById('item-picture').value || null,
       is_available: document.getElementById('item-available').checked
     };
     
+    // Optional: add stock_quantity if you're using it
+    if (document.getElementById('item-stock')) {
+      itemData.stock_quantity = parseInt(document.getElementById('item-stock').value) || 0;
+    }
+    
     try {
-      if (dishId) {
-        await apiPut(`/api/dishes/${dishId}`, itemData);
+      if (itemId) {
+        // Update existing item
+        await apiPut(`/api/menu/${itemId}`, itemData);
         showAlert('Item updated successfully!', 'success');
       } else {
-        await apiPost('/api/dishes', itemData);
+        // Create new item
+        await apiPost('/api/menu', itemData);
         showAlert('Item added successfully!', 'success');
       }
       
@@ -64,64 +79,63 @@ const MenuAdmin = (() => {
       
     } catch (error) {
       console.error('Error saving item:', error);
-      showAlert('Failed to save item. Please try again.', 'error');
+      showAlert(error.message || 'Failed to save item. Please try again.', 'error');
     }
   }
 
   /**
-   * Toggle availability
+   * Toggle availability using the PATCH endpoint
    */
-  async function toggleAvailability(dishId) {
-    const dish = Menu.getDishById(dishId);
+  async function toggleAvailability(itemId) {
+    const item = Menu.getItemById(itemId);
     
-    if (!dish) {
-      showAlert('Dish not found!', 'error');
+    if (!item) {
+      showAlert('Menu item not found!', 'error');
       return;
     }
     
     try {
-      await apiPut(`/api/dishes/${dishId}`, {
-        name: dish.name,
-        description: dish.description,
-        price: dish.price,
-        picture_link: dish.picture_link,
-        is_available: !dish.is_available
+      await apiPatch(`/api/menu/${itemId}/availability`, {
+        is_available: !item.is_available
       });
       
-      showAlert(`Item marked as ${!dish.is_available ? 'available' : 'unavailable'}!`, 'success');
+      const status = !item.is_available ? 'available' : 'unavailable';
+      showAlert(`Item marked as ${status}!`, 'success');
+      
       await Menu.load();
       Menu.displayAdmin('menu-container');
       
     } catch (error) {
       console.error('Error toggling availability:', error);
-      showAlert('Failed to update availability. Please try again.', 'error');
+      showAlert(error.message || 'Failed to update availability. Please try again.', 'error');
     }
   }
 
   /**
    * Delete item
    */
-  async function deleteDish(dishId) {
-    const dish = Menu.getDishById(dishId);
+  async function deleteItem(itemId) {
+    const item = Menu.getItemById(itemId);
     
-    if (!dish) {
-      showAlert('Dish not found!', 'error');
+    if (!item) {
+      showAlert('Menu item not found!', 'error');
       return;
     }
     
-    if (!confirmAction(`Are you sure you want to delete "${dish.name}"? This action cannot be undone.`)) {
+    if (!confirmAction(`Are you sure you want to delete "${item.name}"? This action cannot be undone.`)) {
       return;
     }
     
     try {
-      await apiDelete(`/api/dishes/${dishId}`);
+      await apiDelete(`/api/menu/${itemId}`);
       showAlert('Item deleted successfully!', 'success');
+      
       await Menu.load();
       Menu.displayAdmin('menu-container');
       
     } catch (error) {
       console.error('Error deleting item:', error);
-      showAlert('Failed to delete item. Please try again.', 'error');
+      showAlert(error.message || 'Failed to delete item. Please try again.', 'error');
     }
   }
 
@@ -131,7 +145,7 @@ const MenuAdmin = (() => {
     edit,
     save,
     toggleAvailability,
-    deleteDish
+    deleteItem  // Changed from deleteDish
   };
 })();
 

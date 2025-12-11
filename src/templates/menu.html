@@ -114,6 +114,13 @@
     let cart = [];
     let menuItems = [];
     
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
     // Load menu items
     async function loadMenu() {
         const searchQuery = document.getElementById('searchInput').value;
@@ -121,23 +128,40 @@
         const available = document.getElementById('availabilityFilter').value;
         
         const params = new URLSearchParams({
-            available: available,
-            ...(category && { category }),
-            ...(searchQuery && { search: searchQuery })
+            available: available
         });
+        
+        if (category) {
+            params.append('category', category);
+        }
+        
+        if (searchQuery) {
+            params.append('search', searchQuery);
+        }
         
         try {
             document.getElementById('loadingIndicator').classList.remove('hidden');
             document.getElementById('menuGrid').innerHTML = '';
             
-            const response = await fetch(`${API_BASE}/menu?${params}`);
+            // Updated API endpoint from /menu to match Flask blueprint
+            const response = await fetch(`/api/menu?${params}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
             
-            menuItems = data.items;
+            menuItems = data.items || [];
             displayMenuItems(menuItems);
         } catch (error) {
             console.error('Error loading menu:', error);
-            showFlash('Failed to load menu', 'error');
+            document.getElementById('menuGrid').innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-exclamation-triangle text-6xl text-red-300 mb-4"></i>
+                    <p class="text-xl text-red-500">Failed to load menu. Please try again later.</p>
+                </div>
+            `;
         } finally {
             document.getElementById('loadingIndicator').classList.add('hidden');
         }
@@ -161,13 +185,13 @@
             <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-2 fade-in">
                 <div class="h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
                     ${item.image_url ? 
-                        `<img src="${item.image_url}" alt="${item.name}" class="w-full h-full object-cover">` :
+                        `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-utensils text-6xl text-white\\'></i>'">` :
                         `<i class="fas fa-utensils text-6xl text-white"></i>`
                     }
                 </div>
                 <div class="p-6">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-xl font-bold text-gray-800">${item.name}</h3>
+                        <h3 class="text-xl font-bold text-gray-800">${escapeHtml(item.name)}</h3>
                         ${item.is_available ? 
                             `<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
                                 <i class="fas fa-check-circle"></i>
@@ -177,9 +201,10 @@
                             </span>`
                         }
                     </div>
-                    <p class="text-gray-600 text-sm mb-4">${item.description || 'Delicious and fresh'}</p>
+                    ${item.category ? `<span class="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs mb-2">${escapeHtml(item.category)}</span>` : ''}
+                    <p class="text-gray-600 text-sm mb-4">${escapeHtml(item.description || 'Delicious and fresh')}</p>
                     <div class="flex justify-between items-center">
-                        <span class="text-2xl font-bold text-primary">$${item.price.toFixed(2)}</span>
+                        <span class="text-2xl font-bold text-primary">$${parseFloat(item.price).toFixed(2)}</span>
                         ${item.is_available ? 
                             `<button 
                                 onclick="addToCart(${item.id})"
@@ -214,7 +239,19 @@
         }
         
         updateCartDisplay();
-        showFlash(`${item.name} added to cart`, 'success');
+        showNotification(`${item.name} added to cart`, 'success');
+    }
+    
+    // Show notification (simple implementation)
+    function showNotification(message, type) {
+        // You can replace this with a more sophisticated notification system
+        const alertClass = type === 'success' ? 'alert-success' : 
+                          type === 'error' ? 'alert-error' : 'alert-info';
+        console.log(`${type.toUpperCase()}: ${message}`);
+        // If you have a showAlert function, use it instead
+        if (typeof showAlert === 'function') {
+            showAlert(message, type);
+        }
     }
     
     // Update cart display
@@ -252,8 +289,8 @@
         container.innerHTML = cart.map(item => `
             <div class="flex items-center justify-between border-b py-4">
                 <div class="flex-1">
-                    <h4 class="font-bold text-gray-800">${item.name}</h4>
-                    <p class="text-sm text-gray-600">$${item.price.toFixed(2)} each</p>
+                    <h4 class="font-bold text-gray-800">${escapeHtml(item.name)}</h4>
+                    <p class="text-sm text-gray-600">$${parseFloat(item.price).toFixed(2)} each</p>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-1">
@@ -292,7 +329,7 @@
     function removeFromCart(itemId) {
         cart = cart.filter(i => i.id !== itemId);
         updateCartDisplay();
-        showFlash('Item removed from cart', 'info');
+        showNotification('Item removed from cart', 'info');
     }
     
     // Toggle cart modal
@@ -300,16 +337,21 @@
         document.getElementById('cartModal').classList.toggle('hidden');
     }
     
+    // Get JWT token
+    function getToken() {
+        return localStorage.getItem('token');
+    }
+    
     // Checkout
     async function checkout() {
         if (cart.length === 0) {
-            showFlash('Your cart is empty', 'error');
+            showNotification('Your cart is empty', 'error');
             return;
         }
         
         const token = getToken();
         if (!token) {
-            showFlash('Please login to place an order', 'error');
+            showNotification('Please login to place an order', 'error');
             setTimeout(() => {
                 window.location.href = '/login';
             }, 1000);
@@ -322,12 +364,21 @@
                 quantity: item.quantity
             }));
             
-            const response = await apiRequest('/orders', {
+            const response = await fetch('/api/orders', {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ items: orderItems })
             });
             
-            showFlash('Order placed successfully!', 'success');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to place order');
+            }
+            
+            showNotification('Order placed successfully!', 'success');
             cart = [];
             updateCartDisplay();
             toggleCart();
@@ -337,6 +388,7 @@
             }, 1500);
         } catch (error) {
             console.error('Checkout error:', error);
+            showNotification(error.message || 'Failed to place order', 'error');
         }
     }
     
