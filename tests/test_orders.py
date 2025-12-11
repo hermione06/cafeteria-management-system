@@ -1,7 +1,7 @@
 import pytest
 import json
-from src.models import db, Order, OrderItem, MenuItem
-from src.order import OrderHandler # The utility class tested by the original test_orders.py
+from models import db, Order, OrderItem, MenuItem
+from order import OrderHandler # The utility class tested by the original test_orders.py
 
 # Using the common fixtures from test_auth.py for brevity (app, client, init_db, auth_headers, get_user_data)
 # In a real project, these fixtures would be in conftest.py

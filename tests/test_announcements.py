@@ -1,6 +1,6 @@
 import pytest
 import json
-from src.models import db, Announcement
+from models import db, Announcement
 
 # Using the common fixtures from test_auth.py for brevity (app, client, init_db, auth_headers)
 # In a real project, these fixtures would be in conftest.py
