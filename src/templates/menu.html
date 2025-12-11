@@ -1,28 +1,360 @@
 {% extends "base.html" %}
 
-{% block title %}Menu - CafeHub{% endblock %}
+{% block title %}Menu - Bounty Cafeteria{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=League+Spartan:wght@100..900&display=swap');
+
+    /* Page Header with Gradient */
+    .menu-header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 0;
+        margin-top: 3rem;
+    }
+
+    .gradient-box-menu {
+        width: 100%;
+        height: 120px;
+        background: linear-gradient(180deg, #fff963 0%, #ffffff00 100%);
+        border-radius: 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .menu-title {
+        font-family: 'League Spartan', sans-serif;
+        font-size: 15rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+        letter-spacing: 8px;
+        margin: 0;
+        position: absolute;
+        top: 3%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .menu-subtitle {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #4cb290;
+        letter-spacing: 0.5px;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: white;
+        border-radius: 30px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.2);
+    }
+
+    .filter-input,
+    .filter-select {
+        font-family: 'Fredoka', sans-serif;
+        padding: 0.8rem 1.2rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 50px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+        outline: none;
+        border-color: #4cb290;
+        box-shadow: 0 0 0 3px rgba(76, 178, 144, 0.1);
+    }
+
+    /* Cart Summary */
+    .cart-summary {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #4cb290;
+        color: white;
+        padding: 1.2rem 2rem;
+        border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.4);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 50;
+        font-family: 'Fredoka', sans-serif;
+        font-weight: 700;
+    }
+
+    .cart-summary:hover {
+        background: #3da080;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(76, 178, 144, 0.6);
+    }
+
+    /* Menu Cards */
+    .menu-card {
+        background: white;
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .menu-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(76, 178, 144, 0.3);
+    }
+
+    .menu-card-image {
+        height: 200px;
+        background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .menu-card-content {
+        padding: 1.5rem;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .menu-card-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2D3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .menu-card-description {
+        font-size: 0.9rem;
+        color: #4A5568;
+        margin-bottom: 1rem;
+    }
+
+    .menu-card-price {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #4cb290;
+    }
+
+    .add-to-cart-btn {
+        background: #FFE66D;
+        color: white;
+        font-family: 'Fredoka', sans-serif;
+        font-weight: 700;
+        padding: 0.7rem 1.5rem;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
+    .add-to-cart-btn:hover {
+        background: #FFD93D;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(255, 230, 109, 0.5);
+    }
+
+    .add-to-cart-btn:disabled {
+        background: #e2e8f0;
+        color: #a0aec0;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .available-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .badge-available {
+        background: #c6f6d5;
+        color: #22543d;
+    }
+
+    .badge-unavailable {
+        background: #fed7d7;
+        color: #742a2a;
+    }
+
+    /* Cart Modal */
+    .cart-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .cart-modal-content {
+        background: white;
+        border-radius: 30px;
+        max-width: 700px;
+        width: 100%;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .cart-modal-header {
+        background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+        color: white;
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cart-modal-title {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .cart-close-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .cart-close-btn:hover {
+        transform: rotate(90deg);
+    }
+
+    .cart-items-container {
+        padding: 2rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .cart-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 2px solid #f7fafc;
+    }
+
+    .cart-quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: #f7fafc;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+    }
+
+    .cart-quantity-btn {
+        background: none;
+        border: none;
+        color: #4cb290;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .cart-quantity-btn:hover {
+        transform: scale(1.2);
+    }
+
+    .cart-footer {
+        border-top: 2px solid #e2e8f0;
+        padding: 2rem;
+    }
+
+    .checkout-btn {
+        width: 100%;
+        background: #4cb290;
+        color: white;
+        font-family: 'Fredoka', sans-serif;
+        font-weight: 700;
+        font-size: 1.2rem;
+        padding: 1rem;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .checkout-btn:hover {
+        background: #3da080;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.4);
+    }
+
+    .loading-spinner {
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .spinner-icon {
+        font-size: 3rem;
+        color: #4cb290;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #a0aec0;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
-<div class="mb-8">
-    <h1 class="text-4xl font-bold text-gray-800 mb-2">
-        <i class="fas fa-book-open mr-3"></i> Our Menu
-    </h1>
-    <p class="text-gray-600">Browse our delicious selection of food and beverages</p>
+<div class="menu-header">
+    <div class="gradient-box-menu">
+        <h1 class="menu-title">menu</h1>
+    </div>
+    <p class="menu-subtitle">BROWSE OUR DELICIOUS SELECTION</p>
 </div>
 
 <!-- Filters & Search -->
-<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+<div class="filter-section">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Search -->
         <div class="md:col-span-2">
             <div class="relative">
-                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 <input 
                     type="text" 
                     id="searchInput"
                     placeholder="Search menu items..."
-                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    class="filter-input w-full pl-12"
                     oninput="loadMenu()"
                 >
             </div>
@@ -32,7 +364,7 @@
         <div>
             <select 
                 id="categoryFilter"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                class="filter-select w-full"
                 onchange="loadMenu()"
             >
                 <option value="">All Categories</option>
@@ -47,7 +379,7 @@
         <div>
             <select 
                 id="availabilityFilter"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                class="filter-select w-full"
                 onchange="loadMenu()"
             >
                 <option value="true">Available Only</option>
@@ -58,9 +390,9 @@
 </div>
 
 <!-- Shopping Cart Summary -->
-<div id="cartSummary" class="hidden fixed bottom-4 right-4 bg-primary text-white px-6 py-4 rounded-full shadow-2xl cursor-pointer hover:bg-blue-600 transition transform hover:scale-105 z-50" onclick="toggleCart()">
+<div id="cartSummary" class="cart-summary hidden" onclick="toggleCart()">
     <i class="fas fa-shopping-cart mr-2"></i>
-    <span id="cartCount">0</span> items - $<span id="cartTotal">0.00</span>
+    <span id="cartCount">0</span> items - ₼<span id="cartTotal">0.00</span>
 </div>
 
 <!-- Menu Items Grid -->
@@ -69,39 +401,36 @@
 </div>
 
 <!-- Loading Indicator -->
-<div id="loadingIndicator" class="text-center py-12">
-    <i class="fas fa-spinner fa-spin text-4xl text-primary"></i>
-    <p class="text-gray-600 mt-4">Loading menu...</p>
+<div id="loadingIndicator" class="loading-spinner">
+    <i class="fas fa-spinner spinner-icon"></i>
+    <p style="font-family: 'Fredoka', sans-serif; color: #4A5568; font-weight: 600; margin-top: 1rem;">Loading menu...</p>
 </div>
 
 <!-- Cart Modal -->
-<div id="cartModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+<div id="cartModal" class="cart-modal hidden">
+    <div class="cart-modal-content">
         <!-- Modal Header -->
-        <div class="gradient-bg p-6 text-white flex justify-between items-center">
-            <h2 class="text-2xl font-bold">
+        <div class="cart-modal-header">
+            <h2 class="cart-modal-title">
                 <i class="fas fa-shopping-cart mr-2"></i> Your Cart
             </h2>
-            <button onclick="toggleCart()" class="text-white hover:text-gray-200 text-2xl">
+            <button onclick="toggleCart()" class="cart-close-btn">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         
         <!-- Cart Items -->
-        <div id="cartItems" class="p-6 max-h-96 overflow-y-auto">
+        <div id="cartItems" class="cart-items-container">
             <!-- Cart items will be loaded here -->
         </div>
         
         <!-- Cart Footer -->
-        <div class="border-t p-6">
+        <div class="cart-footer">
             <div class="flex justify-between items-center mb-4">
-                <span class="text-xl font-bold text-gray-800">Total:</span>
-                <span class="text-2xl font-bold text-primary">$<span id="modalCartTotal">0.00</span></span>
+                <span style="font-size: 1.5rem; font-weight: 700; color: #2D3748;">Total:</span>
+                <span style="font-size: 2rem; font-weight: 700; color: #4cb290;">₼<span id="modalCartTotal">0.00</span></span>
             </div>
-            <button 
-                onclick="checkout()"
-                class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition"
-            >
+            <button onclick="checkout()" class="checkout-btn">
                 <i class="fas fa-check mr-2"></i> Proceed to Checkout
             </button>
         </div>
@@ -149,47 +478,47 @@
         
         if (items.length === 0) {
             grid.innerHTML = `
-                <div class="col-span-full text-center py-12">
-                    <i class="fas fa-utensils text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-xl text-gray-500">No items found</p>
+                <div class="col-span-full empty-state">
+                    <i class="fas fa-utensils"></i>
+                    <p style="font-family: 'Fredoka', sans-serif; font-size: 1.2rem; font-weight: 600;">No items found</p>
                 </div>
             `;
             return;
         }
         
         grid.innerHTML = items.map(item => `
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-2 fade-in">
-                <div class="h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+            <div class="menu-card">
+                <div class="menu-card-image">
                     ${item.image_url ? 
                         `<img src="${item.image_url}" alt="${item.name}" class="w-full h-full object-cover">` :
                         `<i class="fas fa-utensils text-6xl text-white"></i>`
                     }
                 </div>
-                <div class="p-6">
+                <div class="menu-card-content">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-xl font-bold text-gray-800">${item.name}</h3>
+                        <h3 class="menu-card-title">${item.name}</h3>
                         ${item.is_available ? 
-                            `<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                                <i class="fas fa-check-circle"></i>
+                            `<span class="available-badge badge-available">
+                                <i class="fas fa-check-circle"></i> Available
                             </span>` :
-                            `<span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">
-                                <i class="fas fa-times-circle"></i>
+                            `<span class="available-badge badge-unavailable">
+                                <i class="fas fa-times-circle"></i> Out
                             </span>`
                         }
                     </div>
-                    <p class="text-gray-600 text-sm mb-4">${item.description || 'Delicious and fresh'}</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-2xl font-bold text-primary">$${item.price.toFixed(2)}</span>
+                    <p class="menu-card-description">${item.description || 'Delicious and fresh'}</p>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="menu-card-price">₼${item.price.toFixed(2)}</span>
                         ${item.is_available ? 
                             `<button 
                                 onclick="addToCart(${item.id})"
-                                class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                                class="add-to-cart-btn"
                             >
                                 <i class="fas fa-plus mr-1"></i> Add
                             </button>` :
                             `<button 
                                 disabled
-                                class="bg-gray-300 text-gray-500 px-4 py-2 rounded-lg cursor-not-allowed"
+                                class="add-to-cart-btn"
                             >
                                 Unavailable
                             </button>`
@@ -241,32 +570,32 @@
         
         if (cart.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-12">
-                    <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500">Your cart is empty</p>
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p style="font-family: 'Fredoka', sans-serif; font-size: 1.2rem; font-weight: 600;">Your cart is empty</p>
                 </div>
             `;
             return;
         }
         
         container.innerHTML = cart.map(item => `
-            <div class="flex items-center justify-between border-b py-4">
-                <div class="flex-1">
-                    <h4 class="font-bold text-gray-800">${item.name}</h4>
-                    <p class="text-sm text-gray-600">$${item.price.toFixed(2)} each</p>
+            <div class="cart-item">
+                <div style="flex: 1;">
+                    <h4 style="font-weight: 700; color: #2D3748; font-size: 1.1rem;">${item.name}</h4>
+                    <p style="color: #4A5568; font-size: 0.9rem;">₼${item.price.toFixed(2)} each</p>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-1">
-                        <button onclick="updateQuantity(${item.id}, -1)" class="text-gray-600 hover:text-primary">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="cart-quantity-controls">
+                        <button onclick="updateQuantity(${item.id}, -1)" class="cart-quantity-btn">
                             <i class="fas fa-minus"></i>
                         </button>
-                        <span class="font-bold w-8 text-center">${item.quantity}</span>
-                        <button onclick="updateQuantity(${item.id}, 1)" class="text-gray-600 hover:text-primary">
+                        <span style="font-weight: 700; min-width: 2rem; text-align: center;">${item.quantity}</span>
+                        <button onclick="updateQuantity(${item.id}, 1)" class="cart-quantity-btn">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
-                    <span class="font-bold text-primary w-20 text-right">$${(item.price * item.quantity).toFixed(2)}</span>
-                    <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700">
+                    <span style="font-weight: 700; color: #4cb290; min-width: 5rem; text-align: right;">₼${(item.price * item.quantity).toFixed(2)}</span>
+                    <button onclick="removeFromCart(${item.id})" style="color: #e53e3e; background: none; border: none; cursor: pointer; font-size: 1.2rem;">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>

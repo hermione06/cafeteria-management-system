@@ -3,111 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Cafeteria Management System{% endblock %}</title>
+    <title>{% block title %}Bounty Cafeteria{% endblock %}</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts - Fredoka -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
     
+    <!-- Custom Bounty Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
     <!-- Custom Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3b82f6',
-                        secondary: '#8b5cf6',
-                        accent: '#f59e0b',
+                        primary: '#4FB3BF',
+                        secondary: '#FFE66D',
+                        accent: '#3BA5B0',
                     }
                 }
             }
         }
     </script>
     
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-    </style>
-    
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body>
+        <!-- Background + Decorative Wrapper -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <!-- Gradient Background -->
+        <div class="absolute inset-0 bg-gradient-to-b from-[#cdffd8] to-[#94b9ff]"></div>
+
+    <div class="wave-bottom">
+        <svg 
+            width="100%" 
+            height="256" 
+            style="position: absolute; bottom: 0; left: 0;" 
+            viewBox="0 0 1440 256" 
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
+        >
+            <defs>
+                <clipPath id="waveClip">
+                    <path d="M0,100 C400,200 800,0 1440,100 L1440,256 L0,256 Z"></path>
+                </clipPath>
+            </defs>
+            <rect width="100%" height="100%" fill="white" clip-path="url(#waveClip)"></rect>
+        </svg>
+        </div>
+
+        <!-- Tropical Images -->
+        <img src="https://media-public.canva.com/pkG0s/MAE2mopkG0s/1/s.png" 
+            class="absolute left-[0px] top-[400px] w-[700px] rotate-[0deg] opacity-100">
+
+        <img src="https://media-public.canva.com/N6Er4/MAEmSLN6Er4/1/t.png" 
+            class="absolute right-[-80px] top-[90px] w-[400px] rotate-[169deg] opacity-100">
+
+        <img src="https://media-public.canva.com/N6Er4/MAEmSLN6Er4/1/t.png" 
+            class="absolute right-[-70px] top-[-160px] w-[500px] rotate-[-151deg] opacity-100">
+
+        <img src="https://media-public.canva.com/kqKoo/MAFlcrkqKoo/1/s.png" 
+            class="absolute left-[-10px] top-[500px] w-[450px] rotate-[0deg] opacity-100">
+    </div>
+
+
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center space-x-2">
-                        <i class="fas fa-utensils text-primary text-2xl"></i>
-                        <span class="text-xl font-bold text-gray-800">CafeHub</span>
-                    </a>
-                </div>
-                
-                <div class="flex items-center space-x-4">
-                    {% if session.user_id %}
-                        <a href="/dashboard" class="text-gray-700 hover:text-primary transition">
-                            <i class="fas fa-home mr-1"></i> Dashboard
-                        </a>
-                        <a href="/menu" class="text-gray-700 hover:text-primary transition">
-                            <i class="fas fa-book-open mr-1"></i> Menu
-                        </a>
-                        <a href="/orders" class="text-gray-700 hover:text-primary transition">
-                            <i class="fas fa-shopping-cart mr-1"></i> Orders
-                        </a>
-                        {% if session.role == 'admin' %}
-                        <a href="/admin" class="text-gray-700 hover:text-primary transition">
-                            <i class="fas fa-cog mr-1"></i> Admin
-                        </a>
-                        {% endif %}
-                        <div class="relative" id="userMenu">
-                            <button class="flex items-center space-x-2 text-gray-700 hover:text-primary transition" onclick="toggleUserMenu()">
-                                <i class="fas fa-user-circle text-2xl"></i>
-                                <span>{{ session.username }}</span>
-                                <i class="fas fa-chevron-down text-xs"></i>
-                            </button>
-                            <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                                <a href="/profile" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-user mr-2"></i> Profile
-                                </a>
-                                <a href="/settings" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-cog mr-2"></i> Settings
-                                </a>
-                                <hr class="my-1">
-                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                                </button>
-                            </div>
-                        </div>
-                    {% else %}
-                        <a href="/menu" class="text-gray-700 hover:text-primary transition">
-                            <i class="fas fa-book-open mr-1"></i> Menu
-                        </a>
-                        <a href="/login" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
-                            Login
-                        </a>
-                        <a href="/register" class="border border-primary text-primary px-4 py-2 rounded-md hover:bg-primary hover:text-white transition">
-                            Sign Up
-                        </a>
-                    {% endif %}
-                </div>
+    <nav class="bg-[#3fc7df] shadow-lg sticky top-0 z-50" style="font-family: 'Fredoka', sans-serif;">
+        <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center text-white font-bold">
+
+            <!-- Left -->
+            <div class="flex space-x-10 tracking-wide flex-1">
+                <a href="/">HOME</a>
+                <a href="/menu">MENU</a>
+            </div>
+
+            <!-- Center -->
+            <div class="text-lg tracking-wide flex-1 text-center">
+                {% if session.user_id %}
+                    WELCOME, {{ session.username|upper }}!
+                {% else %}
+                    WELCOME, GUEST!
+                {% endif %}
+            </div>
+
+            <!-- Right -->
+            <div class="flex space-x-10 tracking-wide flex-1 justify-end">
+                {% if session.role == 'admin' %}
+                    <a href="/orders">ORDERS</a>
+                    <a href="/dashboard">DASHBOARD</a>
+                {% elif session.user_id %}
+                    <a href="/cart">CART</a>
+                    <a href="/account">ACCOUNT</a>
+                {% else %}
+                    <a href="/login">LOGIN</a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -115,41 +112,24 @@
     <!-- Flash Messages -->
     <div id="flashMessages" class="fixed top-20 right-4 z-50 space-y-2"></div>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {% block content %}{% endblock %}
-    </main>
-
+    <!-- Main Content Wrapper -->
+    <div class="relative z-10 pt-10">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <h3 class="text-lg font-bold mb-4">CafeHub</h3>
-                    <p class="text-gray-400">Your campus cafeteria management solution.</p>
+    <footer class="fixed bottom-0 left-0 w-full z-50">
+        <div class="bg-[#3fc7df] h-2 hover:h-32 transition-all duration-500 overflow-hidden relative">
+            <div class="flex flex-col items-center justify-center h-full text-white opacity-0 hover:opacity-100 transition-opacity duration-500" style="font-family: 'Fredoka', sans-serif;">
+                <p class="mb-2 text-lg tracking-wide font-bold">&copy; 2025 UFAZ CAFETERIA. ALL RIGHTS RESERVED.</p>
+                <div class="flex space-x-4">
                 </div>
-                <div>
-                    <h3 class="text-lg font-bold mb-4">Quick Links</h3>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="/menu" class="hover:text-white transition">Menu</a></li>
-                        <li><a href="/about" class="hover:text-white transition">About Us</a></li>
-                        <li><a href="/contact" class="hover:text-white transition">Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold mb-4">Contact</h3>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><i class="fas fa-envelope mr-2"></i> info@cafehub.com</li>
-                        <li><i class="fas fa-phone mr-2"></i> +1 234 567 8900</li>
-                        <li><i class="fas fa-map-marker-alt mr-2"></i> Campus Building A</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2024 CafeHub. All rights reserved.</p>
             </div>
         </div>
     </footer>
+
 
     <!-- Scripts -->
     <script>
@@ -278,5 +258,7 @@
     </script>
     
     {% block extra_js %}{% endblock %}
+
+</div>
 </body>
 </html>

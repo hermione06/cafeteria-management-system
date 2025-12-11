@@ -1,110 +1,568 @@
 {% extends "base.html" %}
 
-{% block title %}Home - CafeHub{% endblock %}
+{% block title %}Home - Bounty Cafeteria{% endblock %}
+
+{% block extra_css %}
+<style>
+    
+    /* League Spartan for bounty title only */
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=League+Spartan:wght@100..900&display=swap');
+
+    body {
+    overflow-y: hidden; /* Prevents horizontal scrolling */
+    }
+    
+    /* Hero Section Styles */
+    .hero-container {
+        position: relative;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 3rem 4rem;
+        margin-bottom: 3rem;
+    }
+    
+    .hero-left {
+        position: relative;
+        z-index: 10;
+        flex: 0 0 50%;
+        /* move text more to the left */
+        margin-left: -19rem; /* adjust as needed */
+    }
+    
+    .hero-right {
+        position: relative;
+        z-index: 10;
+        flex: 0 0 40%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    /* Gradient Box - Rectangular, top to bottom */
+    .gradient-box {
+        position: absolute;
+        left: -250px;
+        top: 80px;
+        width: 800px;
+        height: 200px;
+        background: linear-gradient(180deg, #fff963 0%, #ffffff00 100%);
+        border-radius: 0px;
+        z-index: 1;
+    }
+    
+    .bounty-title {
+        font-family: 'League Spartan', sans-serif;
+        font-size: 15rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+        line-height: 0.85;
+        margin-bottom: 0.5rem;
+        margin-top: -22rem;
+        position: relative;
+        z-index: 10;
+        letter-spacing: 8px;
+        padding-right: 4rem; 
+    }
+    
+    .bounty-subtitle {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #4cb290;
+        margin-bottom: 0;
+        margin-top: 1.5rem;
+        position: relative;
+        z-index: 10;
+        letter-spacing: 0.5px;
+        left: 250px;  /* moves left */
+        top: -40px;    /* moves down */
+    }
+    
+    .announcements-btn {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: white;
+        background: #4cb290;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(76, 178, 144, 0.4);
+        position: relative;
+        z-index: 10;
+        left: 250px;
+        top: -20px;
+    }
+    
+    .announcements-btn:hover {
+        background: #3da080;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(76, 178, 144, 0.6);
+    }
+    
+    /* Buttons on the RIGHT side */
+    .hero-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        width: 100%;
+        max-width: 420px;
+    }
+    
+    .hero-btn {
+        background: #FFE66D;
+        color: white;
+        font-family: 'Fredoka', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 2rem 3rem;
+        border-radius: 70px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(255, 230, 109, 0.6);
+        transition: all 0.3s ease;
+        letter-spacing: 2px;
+        display: block;
+        cursor: pointer;
+        border: none;
+    }
+    
+    .hero-btn:hover {
+        background: #FFD93D;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(255, 230, 109, 0.8);
+    }
+    
+    /* Decorative Images */
+    .decoration-images {
+        position: absolute;
+        bottom: -50px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding: 0 3rem;
+        z-index: 5;
+        pointer-events: none;
+    }
+    
+    .decoration-item {
+        width: 300px;
+        height: auto;
+        object-fit: contain;
+    }
+    
+    .decoration-left {
+        margin-bottom: 0;
+    }
+    
+    .decoration-center {
+        margin-bottom: 20px;
+    }
+    
+    .decoration-right {
+        margin-bottom: 0;
+    }
+    
+    /* Popup Modal Styles */
+    .popup-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .popup-overlay.active {
+        display: flex !important;
+    }
+    
+    .popup-content {
+        background: white;
+        border-radius: 30px;
+        padding: 3rem;
+        max-width: 700px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.4s ease;
+    }
+    
+    .popup-close {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        background: #FFE66D;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .popup-close:hover {
+        background: #FFD93D;
+        transform: rotate(90deg);
+    }
+    
+    .popup-title {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #4cb290;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .popup-feature {
+        background: #f8f9fa;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .popup-feature:hover {
+        transform: translateX(10px);
+        box-shadow: 0 5px 15px rgba(76, 178, 144, 0.2);
+    }
+    
+    .popup-icon {
+        background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        flex-shrink: 0;
+    }
+    
+    .popup-feature-content h3 {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2D3748;
+        margin-bottom: 0.5rem;
+    }
+    
+    .popup-feature-content p {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1rem;
+        color: #4A5568;
+        line-height: 1.6;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .bounty-title {
+            font-size: 7rem;
+        }
+        
+        .gradient-box {
+            width: 380px;
+            height: 300px;
+        }
+        
+        .hero-btn {
+            font-size: 1.4rem;
+            padding: 1.2rem 2rem;
+        }
+    }
+    
+    @media (max-width: 1024px) {
+        .bounty-title {
+            font-size: 6rem;
+        }
+        
+        .gradient-box {
+            width: 350px;
+            height: 280px;
+            left: 30px;
+            top: 60px;
+        }
+        
+        .decoration-item {
+            width: 220px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .hero-container {
+            flex-direction: column;
+            text-align: center;
+            padding: 2rem 1rem;
+            min-height: 500px;
+        }
+        
+        .hero-left,
+        .hero-right {
+            flex: 1 1 100%;
+            width: 100%;
+        }
+        
+        .hero-left {
+            margin-bottom: 3rem;
+        }
+        
+        .bounty-title {
+            font-size: 4.5rem;
+        }
+        
+        .gradient-box {
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 240px;
+            top: 40px;
+        }
+        
+        .hero-buttons {
+            margin: 0 auto;
+            max-width: 300px;
+        }
+        
+        .hero-btn {
+            font-size: 1.3rem;
+            padding: 1.1rem 2rem;
+        }
+        
+        .decoration-images {
+            position: absolute; /* relative to .page-wrapper */
+            bottom: 0; /* stick to bottom of viewport */
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
+        }
+
+        .popup-content {
+            padding: 2rem;
+            max-width: 95%;
+        }
+        
+        .popup-title {
+            font-size: 2rem;
+        }
+        
+        .popup-feature {
+            flex-direction: column;
+            text-align: center;
+            align-items: center;
+        }
+        .page-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100vh; /* full viewport height */
+        overflow: hidden; /* crop anything outside the viewport */
+    }
+
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<div class="gradient-bg rounded-2xl shadow-2xl overflow-hidden mb-12">
-    <div class="px-6 py-20 md:px-12 md:py-32 text-center">
-        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 fade-in">
-            Welcome to CafeHub
-        </h1>
-        <p class="text-xl md:text-2xl text-white/90 mb-8 fade-in">
-            Order delicious meals from your campus cafeteria with ease
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center fade-in">
-            {% if not session.user_id %}
-            <a href="/menu" class="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105 shadow-lg">
-                <i class="fas fa-book-open mr-2"></i> View Menu
-            </a>
-            <a href="/register" class="glass-effect text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/20 transition transform hover:scale-105">
-                <i class="fas fa-user-plus mr-2"></i> Sign Up Now
-            </a>
+<div class="hero-container">
+    <!-- Gradient Background Box -->
+    <div class="gradient-box"></div>
+    
+    <!-- Left Side: Text -->
+    <div class="hero-left">
+        <h1 class="bounty-title">bounty</h1>
+        <p class="bounty-subtitle">UFAZ CAFETERIA — MADE SIMPLE</p>
+        <button class="announcements-btn" onclick="openAnnouncementsPopup()">📢 View Announcements</button>
+    </div>
+    
+    <!-- Right Side: Buttons -->
+    <div class="hero-right">
+        <div class="hero-buttons">
+            {% if session.role == 'admin' %}
+                <a href="/menu" class="hero-btn">MANAGE MENU</a>
+                <a href="/orders" class="hero-btn">MANAGE ORDERS</a>
+                <a href="/dashboard" class="hero-btn">DASHBOARD</a>
+            {% elif session.user_id %}
+                <a href="/menu" class="hero-btn">VIEW MENU</a>
+                <a href="/orders" class="hero-btn">MY ORDER</a>
+                <a href="/account" class="hero-btn">MY ACCOUNT</a>
             {% else %}
-            <a href="/menu" class="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105 shadow-lg">
-                <i class="fas fa-book-open mr-2"></i> Browse Menu
-            </a>
-            <a href="/orders" class="glass-effect text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/20 transition transform hover:scale-105">
-                <i class="fas fa-shopping-cart mr-2"></i> My Orders
-            </a>
+                <a href="/menu" class="hero-btn">VIEW MENU</a>
+                <a href="/login" class="hero-btn">LOGIN/REGISTER</a>
+                <button class="hero-btn" onclick="openWhyBountyPopup()">WHY BOUNTY?</button>
             {% endif %}
         </div>
     </div>
+    
+    <!-- Decorative Images -->
+    <div class="decoration-images">
+        <img src="https://media-public.canva.com/Vx7uQ/MAF-jBVx7uQ/1/s.png" 
+             class="absolute left-[100px] top-[-70px] w-[550px] rotate-[0deg] opacity-100">
+        
+        <img src="https://media-public.canva.com/Xje4s/MAEGsyXje4s/1/s.png" 
+             class="absolute left-[700px] top-[-160px] w-[400px] rotate-[0deg] opacity-100">
+        
+        <img src="https://media-public.canva.com/lZTR8/MAFbHMlZTR8/1/s.png" 
+             class="absolute left-[1150px] top-[-100px] w-[650px] rotate-[-10deg] opacity-100">
+    </div>
 </div>
 
-<!-- Announcements -->
-<div id="announcementsSection" class="mb-12"></div>
-
-<!-- Features Section -->
-<div class="mb-12">
-    <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Why Choose CafeHub?</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2">
-            <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-clock text-3xl text-primary"></i>
+<!-- Why Bounty Popup -->
+<div id="whyBountyPopup" class="popup-overlay" onclick="closePopupOnOverlay(event)">
+    <div class="popup-content">
+        <button class="popup-close" onclick="closeWhyBountyPopup()">&times;</button>
+        <h2 class="popup-title">🍽️ Why Choose Bounty?</h2>
+        
+        <div class="popup-feature">
+            <div class="popup-icon">⚡</div>
+            <div class="popup-feature-content">
+                <h3>Quick & Easy Ordering</h3>
+                <p>Order your favorite meals in seconds and skip the queue. Browse the menu, add items to your cart, and place your order from anywhere on campus.</p>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Quick & Easy</h3>
-            <p class="text-gray-600">Order your favorite meals in seconds and skip the queue</p>
         </div>
         
-        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2">
-            <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-utensils text-3xl text-green-600"></i>
+        <div class="popup-feature">
+            <div class="popup-icon">🥗</div>
+            <div class="popup-feature-content">
+                <h3>Fresh & Quality Food</h3>
+                <p>All meals are prepared fresh daily with quality ingredients. We ensure every dish meets the highest standards of taste and nutrition.</p>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Fresh Food</h3>
-            <p class="text-gray-600">All meals prepared fresh daily with quality ingredients</p>
         </div>
         
-        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2">
-            <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-bell text-3xl text-purple-600"></i>
+        <div class="popup-feature">
+            <div class="popup-icon">🔔</div>
+            <div class="popup-feature-content">
+                <h3>Real-time Order Tracking</h3>
+                <p>Track your order status from preparation to pickup. Get instant notifications when your meal is ready to collect.</p>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Real-time Updates</h3>
-            <p class="text-gray-600">Track your order status from preparation to pickup</p>
+        </div>
+        
+        <div class="popup-feature">
+            <div class="popup-icon">💳</div>
+            <div class="popup-feature-content">
+                <h3>Seamless Payments</h3>
+                <p>Manage your account balance easily. Top up online and pay for your orders instantly without the hassle of carrying cash.</p>
+            </div>
+        </div>
+        
+        <div class="popup-feature">
+            <div class="popup-icon">🎓</div>
+            <div class="popup-feature-content">
+                <h3>Made for UFAZ Students</h3>
+                <p>Designed specifically for the UFAZ community. Enjoy a cafeteria experience tailored to your campus lifestyle.</p>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Popular Items -->
-<div class="mb-12">
-    <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Popular Items</h2>
-    <div id="popularItems" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <!-- Items will be loaded via JavaScript -->
-    </div>
-</div>
-
-<!-- Stats Section -->
-<div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl p-12 text-white mb-12">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-        <div>
-            <div class="text-5xl font-bold mb-2">500+</div>
-            <div class="text-xl text-white/80">Happy Customers</div>
-        </div>
-        <div>
-            <div class="text-5xl font-bold mb-2">50+</div>
-            <div class="text-xl text-white/80">Menu Items</div>
-        </div>
-        <div>
-            <div class="text-5xl font-bold mb-2">1000+</div>
-            <div class="text-xl text-white/80">Orders Completed</div>
+<!-- Announcements Popup -->
+<div id="announcementsPopup" class="popup-overlay" onclick="closePopupOnOverlay(event)">
+    <div class="popup-content">
+        <button class="popup-close" onclick="closeAnnouncementsPopup()">&times;</button>
+        <h2 class="popup-title">📢 Announcements</h2>
+        <div id="announcementsPopupContent">
+            <!-- Announcements will be loaded here -->
         </div>
     </div>
 </div>
 
-<!-- CTA Section -->
-{% if not session.user_id %}
-<div class="bg-white rounded-2xl shadow-xl p-12 text-center">
-    <h2 class="text-3xl font-bold text-gray-800 mb-4">Ready to Get Started?</h2>
-    <p class="text-xl text-gray-600 mb-8">Join CafeHub today and enjoy hassle-free meal ordering</p>
-    <a href="/register" class="inline-block bg-primary text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-600 transition transform hover:scale-105 shadow-lg">
-        <i class="fas fa-user-plus mr-2"></i> Create Your Account
-    </a>
-</div>
-{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    // Popup functions
+    function openWhyBountyPopup() {
+        document.getElementById('whyBountyPopup').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeWhyBountyPopup() {
+        document.getElementById('whyBountyPopup').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+    
+    function openAnnouncementsPopup() {
+        loadAnnouncementsPopup();
+        document.getElementById('announcementsPopup').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeAnnouncementsPopup() {
+        document.getElementById('announcementsPopup').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+    
+    function closePopupOnOverlay(event) {
+        if (event.target.id === 'whyBountyPopup') {
+            closeWhyBountyPopup();
+        }
+        if (event.target.id === 'announcementsPopup') {
+            closeAnnouncementsPopup();
+        }
+    }
+    
+    // Close popup with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeWhyBountyPopup();
+            closeAnnouncementsPopup();
+        }
+    });
+    
+    // Smooth scroll to announcements section (kept for compatibility)
+    function scrollToAnnouncements(event) {
+        event.preventDefault();
+        const element = document.getElementById('announcementsSection');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+    
     // Load announcements
     async function loadAnnouncements() {
         try {
@@ -119,15 +577,15 @@
                 
                 if (activeAnnouncements.length > 0) {
                     container.innerHTML = `
-                        <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4">
-                                <i class="fas fa-bullhorn mr-2"></i> Announcements
+                        <div class="bg-white rounded-3xl p-8 shadow-xl max-w-5xl mx-auto border-l-8" style="border-color: #4FB3BF;">
+                            <h3 class="text-3xl font-bold mb-6" style="font-family: 'Fredoka', sans-serif; color: #2D3748;">
+                                📢 Announcements
                             </h3>
-                            <div class="space-y-3">
+                            <div class="space-y-4">
                                 ${activeAnnouncements.map(ann => `
-                                    <div class="bg-white p-4 rounded-lg shadow">
-                                        <h4 class="font-bold text-gray-800">${ann.title}</h4>
-                                        <p class="text-gray-600 mt-1">${ann.message}</p>
+                                    <div class="bg-gray-50 p-5 rounded-2xl">
+                                        <h4 class="font-bold text-lg" style="font-family: 'Fredoka', sans-serif; color: #2D3748;">${ann.title}</h4>
+                                        <p class="mt-2" style="font-family: 'Fredoka', sans-serif; color: #4A5568;">${ann.message}</p>
                                     </div>
                                 `).join('')}
                             </div>
@@ -140,49 +598,69 @@
         }
     }
     
-    // Load popular items
-    async function loadPopularItems() {
+    // Load announcements for popup
+    async function loadAnnouncementsPopup() {
         try {
-            const response = await fetch(`${API_BASE}/menu?available=true&per_page=4`);
+            const response = await fetch(`${API_BASE}/announcements`);
             const data = await response.json();
             
-            const container = document.getElementById('popularItems');
+            const container = document.getElementById('announcementsPopupContent');
             
-            if (data.items && data.items.length > 0) {
-                container.innerHTML = data.items.map(item => `
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-2">
-                        <div class="h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                            <i class="fas fa-utensils text-6xl text-white"></i>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">${item.name}</h3>
-                            <p class="text-gray-600 mb-4 text-sm">${item.description || 'Delicious and fresh'}</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-primary">$${item.price.toFixed(2)}</span>
-                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-                                    <i class="fas fa-check-circle mr-1"></i> Available
-                                </span>
+            if (data.announcements && data.announcements.length > 0) {
+                const activeAnnouncements = data.announcements.filter(a => 
+                    a.title !== "No announcements yet"
+                );
+                
+                if (activeAnnouncements.length > 0) {
+                    container.innerHTML = activeAnnouncements.map(ann => `
+                        <div class="popup-feature">
+                            <div class="popup-icon">📢</div>
+                            <div class="popup-feature-content">
+                                <h3>${ann.title}</h3>
+                                <p>${ann.message}</p>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="popup-feature">
+                            <div class="popup-icon">📭</div>
+                            <div class="popup-feature-content">
+                                <h3>No Announcements</h3>
+                                <p>There are no announcements at this time. Check back later!</p>
+                            </div>
+                        </div>
+                    `;
+                }
             } else {
                 container.innerHTML = `
-                    <div class="col-span-full text-center text-gray-500 py-12">
-                        <i class="fas fa-utensils text-6xl mb-4"></i>
-                        <p class="text-xl">No items available at the moment</p>
+                    <div class="popup-feature">
+                        <div class="popup-icon">📭</div>
+                        <div class="popup-feature-content">
+                            <h3>No Announcements</h3>
+                            <p>There are no announcements at this time. Check back later!</p>
+                        </div>
                     </div>
                 `;
             }
         } catch (error) {
-            console.error('Error loading popular items:', error);
+            console.error('Error loading announcements popup:', error);
+            const container = document.getElementById('announcementsPopupContent');
+            container.innerHTML = `
+                <div class="popup-feature">
+                    <div class="popup-icon">⚠️</div>
+                    <div class="popup-feature-content">
+                        <h3>Error Loading Announcements</h3>
+                        <p>Unable to load announcements. Please try again later.</p>
+                    </div>
+                </div>
+            `;
         }
     }
     
     // Load data on page load
     document.addEventListener('DOMContentLoaded', function() {
         loadAnnouncements();
-        loadPopularItems();
     });
 </script>
 {% endblock %}

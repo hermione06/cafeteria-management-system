@@ -1,62 +1,492 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard - CafeHub{% endblock %}
+{% block title %}Admin Dashboard - Bounty Cafeteria{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=League+Spartan:wght@100..900&display=swap');
+
+    /* Page Header with Gradient */
+    .admin-header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 0;
+        margin-top: 3rem;
+    }
+
+    .gradient-box-admin {
+        width: 100%;
+        height: 120px;
+        background: linear-gradient(180deg, #fff963 0%, #ffffff00 100%);
+        border-radius: 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .admin-title {
+        font-family: 'League Spartan', sans-serif;
+        font-size: 15rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+        letter-spacing: 8px;
+        margin: 0;
+        position: absolute;
+        top: 3%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .admin-subtitle {
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #4cb290;
+        letter-spacing: 0.5px;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+        background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+        border-radius: 30px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.3);
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-text {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    /* Stats Cards */
+    .stats-card {
+        background: white;
+        border-radius: 25px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(76, 178, 144, 0.3);
+    }
+
+    .stats-label {
+        color: #4A5568;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2D3748;
+    }
+
+    .stats-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .icon-azure { background: #CCEFFF; color: #3fc7df; }
+    .icon-green { background: #c6f6d5; color: #48bb78; }
+    .icon-coral { background: #FFE4D6; color: #FF9A76; }
+    .icon-yellow { background: #FFF9C4; color: #FFD93D; }
+
+    /* Quick Action Buttons */
+    .action-btn {
+        border-radius: 25px;
+        padding: 2rem;
+        color: white;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+        cursor: pointer;
+        border: none;
+        width: 100%;
+        text-align: center;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .action-btn i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .action-btn h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    .action-users { background: linear-gradient(135deg, #3fc7df 0%, #00b4d8 100%); }
+    .action-menu { background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%); }
+    .action-orders { background: linear-gradient(135deg, #FF9A76 0%, #FF6B6B 100%); }
+    .action-announcements { background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%); }
+
+    /* Management Sections */
+    .management-section {
+        background: white;
+        border-radius: 30px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2D3748;
+    }
+
+    .add-btn {
+        background: #4cb290;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .add-btn:hover {
+        background: #3da080;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(76, 178, 144, 0.4);
+    }
+
+    /* Tables */
+    .admin-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .admin-table thead {
+        background: #f7fafc;
+    }
+
+    .admin-table th {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #4A5568;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .admin-table td {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .admin-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .admin-table tbody tr:hover {
+        background: #f7fafc;
+    }
+
+    /* Menu Item Cards */
+    .menu-item-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .menu-item-card:hover {
+        border-color: #4cb290;
+        box-shadow: 0 5px 15px rgba(76, 178, 144, 0.2);
+    }
+
+    .menu-item-title {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #2D3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .menu-item-price {
+        color: #4cb290;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .availability-badge {
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .badge-available {
+        background: #c6f6d5;
+        color: #22543d;
+    }
+
+    .badge-unavailable {
+        background: #FEE2E2;
+        color: #742a2a;
+    }
+
+    .toggle-btn {
+        color: #4cb290;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.5rem;
+        transition: transform 0.2s ease;
+    }
+
+    .toggle-btn:hover {
+        transform: scale(1.2);
+    }
+
+    /* Order Cards */
+    .order-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+        border-color: #4cb290;
+        box-shadow: 0 5px 15px rgba(76, 178, 144, 0.2);
+    }
+
+    /* Announcement Cards */
+    .announcement-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .announcement-card:hover {
+        border-color: #FFE66D;
+        box-shadow: 0 5px 15px rgba(255, 230, 109, 0.3);
+    }
+
+    .announcement-title {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #2D3748;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 30px;
+        max-width: 500px;
+        width: 100%;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        font-family: 'Fredoka', sans-serif;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+        color: white;
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .modal-close:hover {
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        color: #2D3748;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        font-family: 'Fredoka', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: #4cb290;
+        box-shadow: 0 0 0 3px rgba(76, 178, 144, 0.1);
+    }
+
+    .submit-btn {
+        width: 100%;
+        background: #4cb290;
+        color: white;
+        padding: 1rem;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        font-family: 'Fredoka', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .submit-btn:hover {
+        background: #3da080;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(76, 178, 144, 0.4);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<!-- Page Header -->
+<div class="admin-header">
+    <div class="gradient-box-admin">
+        <h1 class="admin-title">admin</h1>
+    </div>
+    <p class="admin-subtitle">MANAGE YOUR CAFETERIA OPERATIONS</p>
+</div>
+
 <!-- Welcome Section -->
-<div class="gradient-bg rounded-2xl shadow-2xl p-8 mb-8 text-white">
-    <h1 class="text-3xl font-bold mb-2">
+<div class="welcome-section">
+    <h2 class="welcome-title">
         <i class="fas fa-shield-alt mr-3"></i> Admin Dashboard
-    </h1>
-    <p class="text-white/80">Manage your cafeteria operations</p>
+    </h2>
+    <p class="welcome-text">Manage your cafeteria operations</p>
 </div>
 
 <!-- Stats Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="stats-card">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Total Users</p>
-                <p class="text-3xl font-bold text-gray-800" id="totalUsers">0</p>
+                <p class="stats-label">Total Users</p>
+                <p class="stats-value" id="totalUsers">0</p>
             </div>
-            <div class="bg-blue-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-users text-2xl text-blue-600"></i>
+            <div class="stats-icon icon-azure">
+                <i class="fas fa-users"></i>
             </div>
         </div>
     </div>
     
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="stats-card">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Total Orders</p>
-                <p class="text-3xl font-bold text-gray-800" id="totalOrders">0</p>
+                <p class="stats-label">Total Orders</p>
+                <p class="stats-value" id="totalOrders">0</p>
             </div>
-            <div class="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-shopping-cart text-2xl text-green-600"></i>
+            <div class="stats-icon icon-green">
+                <i class="fas fa-shopping-cart"></i>
             </div>
         </div>
     </div>
     
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="stats-card">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Menu Items</p>
-                <p class="text-3xl font-bold text-gray-800" id="totalMenuItems">0</p>
+                <p class="stats-label">Menu Items</p>
+                <p class="stats-value" id="totalMenuItems">0</p>
             </div>
-            <div class="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-utensils text-2xl text-purple-600"></i>
+            <div class="stats-icon icon-coral">
+                <i class="fas fa-utensils"></i>
             </div>
         </div>
     </div>
     
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="stats-card">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Revenue</p>
-                <p class="text-3xl font-bold text-gray-800">$<span id="totalRevenue">0</span></p>
+                <p class="stats-label">Revenue</p>
+                <p class="stats-value">₼<span id="totalRevenue">0</span></p>
             </div>
-            <div class="bg-yellow-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-dollar-sign text-2xl text-yellow-600"></i>
+            <div class="stats-icon icon-yellow">
+                <i class="fas fa-dollar-sign"></i>
             </div>
         </div>
     </div>
@@ -64,52 +494,52 @@
 
 <!-- Quick Actions -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <button onclick="showSection('users')" class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl transition transform hover:-translate-y-1">
-        <i class="fas fa-users text-3xl mb-3"></i>
-        <h3 class="text-lg font-bold">Manage Users</h3>
+    <button onclick="showSection('users')" class="action-btn action-users">
+        <i class="fas fa-users"></i>
+        <h3>Manage Users</h3>
     </button>
     
-    <button onclick="showSection('menu')" class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl transition transform hover:-translate-y-1">
-        <i class="fas fa-utensils text-3xl mb-3"></i>
-        <h3 class="text-lg font-bold">Manage Menu</h3>
+    <button onclick="showSection('menu')" class="action-btn action-menu">
+        <i class="fas fa-utensils"></i>
+        <h3>Manage Menu</h3>
     </button>
     
-    <button onclick="showSection('orders')" class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl transition transform hover:-translate-y-1">
-        <i class="fas fa-shopping-cart text-3xl mb-3"></i>
-        <h3 class="text-lg font-bold">Manage Orders</h3>
+    <button onclick="showSection('orders')" class="action-btn action-orders">
+        <i class="fas fa-shopping-cart"></i>
+        <h3>Manage Orders</h3>
     </button>
     
-    <button onclick="showSection('announcements')" class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl transition transform hover:-translate-y-1">
-        <i class="fas fa-bullhorn text-3xl mb-3"></i>
-        <h3 class="text-lg font-bold">Announcements</h3>
+    <button onclick="showSection('announcements')" class="action-btn action-announcements">
+        <i class="fas fa-bullhorn"></i>
+        <h3>Announcements</h3>
     </button>
 </div>
 
 <!-- Management Sections -->
-<div id="usersSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
-    <h2 class="text-2xl font-bold mb-4"><i class="fas fa-users mr-2"></i> User Management</h2>
+<div id="usersSection" class="hidden management-section">
+    <h2 class="section-title"><i class="fas fa-users mr-2"></i> User Management</h2>
     <div id="usersList"></div>
 </div>
 
-<div id="menuSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold"><i class="fas fa-utensils mr-2"></i> Menu Management</h2>
-        <button onclick="showAddMenuItem()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+<div id="menuSection" class="hidden management-section">
+    <div class="section-header">
+        <h2 class="section-title"><i class="fas fa-utensils mr-2"></i> Menu Management</h2>
+        <button onclick="showAddMenuItem()" class="add-btn">
             <i class="fas fa-plus mr-2"></i> Add Item
         </button>
     </div>
     <div id="menuList"></div>
 </div>
 
-<div id="ordersSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
-    <h2 class="text-2xl font-bold mb-4"><i class="fas fa-shopping-cart mr-2"></i> Order Management</h2>
+<div id="ordersSection" class="hidden management-section">
+    <h2 class="section-title"><i class="fas fa-shopping-cart mr-2"></i> Order Management</h2>
     <div id="ordersList"></div>
 </div>
 
-<div id="announcementsSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold"><i class="fas fa-bullhorn mr-2"></i> Announcements</h2>
-        <button onclick="showAddAnnouncement()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+<div id="announcementsSection" class="hidden management-section">
+    <div class="section-header">
+        <h2 class="section-title"><i class="fas fa-bullhorn mr-2"></i> Announcements</h2>
+        <button onclick="showAddAnnouncement()" class="add-btn">
             <i class="fas fa-plus mr-2"></i> New Announcement
         </button>
     </div>
@@ -117,43 +547,43 @@
 </div>
 
 <!-- Recent Activity -->
-<div class="bg-white rounded-xl shadow-lg p-6">
-    <h2 class="text-2xl font-bold mb-4"><i class="fas fa-history mr-2"></i> Recent Orders</h2>
+<div class="management-section">
+    <h2 class="section-title"><i class="fas fa-history mr-2"></i> Recent Orders</h2>
     <div id="recentOrders"></div>
 </div>
 
 <!-- Add Menu Item Modal -->
-<div id="addMenuModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-        <div class="gradient-bg p-6 text-white flex justify-between items-center">
-            <h2 class="text-2xl font-bold">Add Menu Item</h2>
-            <button onclick="closeAddMenuItem()" class="text-white hover:text-gray-200">
-                <i class="fas fa-times text-2xl"></i>
+<div id="addMenuModal" class="hidden modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add Menu Item</h2>
+            <button onclick="closeAddMenuItem()" class="modal-close">
+                <i class="fas fa-times"></i>
             </button>
         </div>
-        <form id="addMenuForm" class="p-6 space-y-4">
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Name</label>
-                <input type="text" name="name" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+        <form id="addMenuForm" class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" required class="form-input">
             </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Description</label>
-                <textarea name="description" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"></textarea>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" rows="3" class="form-textarea"></textarea>
             </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Price</label>
-                <input type="number" name="price" step="0.01" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+            <div class="form-group">
+                <label class="form-label">Price</label>
+                <input type="number" name="price" step="0.01" required class="form-input">
             </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Category</label>
-                <select name="category" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select name="category" required class="form-select">
                     <option value="beverages">Beverages</option>
                     <option value="food">Food</option>
                     <option value="snacks">Snacks</option>
                     <option value="desserts">Desserts</option>
                 </select>
             </div>
-            <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition">
+            <button type="submit" class="submit-btn">
                 <i class="fas fa-plus mr-2"></i> Add Item
             </button>
         </form>
@@ -215,7 +645,7 @@
         }
     }
     
-    // Load users (simplified)
+    // Load users
     async function loadUsers() {
         try {
             const data = await apiRequest('/users');
@@ -223,22 +653,22 @@
             
             container.innerHTML = `
                 <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
+                    <table class="admin-table">
+                        <thead>
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
+                        <tbody>
                             ${data.users.map(user => `
                                 <tr>
-                                    <td class="px-6 py-4">${user.username}</td>
-                                    <td class="px-6 py-4">${user.email}</td>
-                                    <td class="px-6 py-4">${user.role}</td>
-                                    <td class="px-6 py-4">${user.is_active ? '✅ Active' : '❌ Inactive'}</td>
+                                    <td style="font-weight: 700; color: #2D3748;">${user.username}</td>
+                                    <td style="color: #4A5568;">${user.email}</td>
+                                    <td style="color: #4A5568;">${user.role}</td>
+                                    <td>${user.is_active ? '<span style="color: #48bb78;">✅ Active</span>' : '<span style="color: #e53e3e;">❌ Inactive</span>'}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -259,15 +689,15 @@
             container.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     ${data.items.map(item => `
-                        <div class="border rounded-lg p-4">
-                            <h3 class="font-bold text-lg">${item.name}</h3>
-                            <p class="text-gray-600 text-sm mb-2">${item.description || ''}</p>
-                            <p class="text-primary font-bold text-xl mb-2">$${item.price.toFixed(2)}</p>
+                        <div class="menu-item-card">
+                            <h3 class="menu-item-title">${item.name}</h3>
+                            <p style="color: #4A5568; font-size: 0.9rem; margin-bottom: 0.5rem;">${item.description || ''}</p>
+                            <p class="menu-item-price">₼${item.price.toFixed(2)}</p>
                             <div class="flex justify-between items-center">
-                                <span class="px-2 py-1 ${item.is_available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} rounded text-xs">
+                                <span class="availability-badge ${item.is_available ? 'badge-available' : 'badge-unavailable'}">
                                     ${item.is_available ? '✅ Available' : '❌ Unavailable'}
                                 </span>
-                                <button onclick="toggleAvailability(${item.id}, ${!item.is_available})" class="text-blue-600 hover:text-blue-800">
+                                <button onclick="toggleAvailability(${item.id}, ${!item.is_available})" class="toggle-btn">
                                     <i class="fas fa-toggle-${item.is_available ? 'on' : 'off'}"></i>
                                 </button>
                             </div>
@@ -323,7 +753,7 @@
         }
     });
     
-    // Load orders (simplified)
+    // Load orders
     async function loadOrders() {
         try {
             const data = await apiRequest('/orders');
@@ -332,15 +762,15 @@
             container.innerHTML = `
                 <div class="space-y-4">
                     ${data.orders.slice(0, 10).map(order => `
-                        <div class="border rounded-lg p-4">
+                        <div class="order-card">
                             <div class="flex justify-between items-center">
                                 <div>
-                                    <h3 class="font-bold">Order #${order.id}</h3>
-                                    <p class="text-sm text-gray-600">${new Date(order.created_at).toLocaleString()}</p>
+                                    <h3 style="font-weight: 700; font-size: 1.2rem; color: #2D3748;">Order #${order.id}</h3>
+                                    <p style="font-size: 0.9rem; color: #4A5568;">${new Date(order.created_at).toLocaleString()}</p>
                                 </div>
-                                <div class="text-right">
-                                    <p class="font-bold text-primary">$${order.total_price.toFixed(2)}</p>
-                                    <p class="text-sm">${order.status}</p>
+                                <div style="text-align: right;">
+                                    <p style="font-weight: 700; color: #4cb290; font-size: 1.3rem;">₼${order.total_price.toFixed(2)}</p>
+                                    <p style="font-size: 0.9rem; color: #4A5568;">${order.status}</p>
                                 </div>
                             </div>
                         </div>
@@ -352,7 +782,7 @@
         }
     }
     
-    // Load announcements (simplified)
+    // Load announcements
     async function loadAnnouncements() {
         try {
             const data = await apiRequest('/announcements/all');
@@ -361,10 +791,10 @@
             container.innerHTML = `
                 <div class="space-y-4">
                     ${data.announcements.map(ann => `
-                        <div class="border rounded-lg p-4">
-                            <h3 class="font-bold text-lg">${ann.title}</h3>
-                            <p class="text-gray-600 mt-2">${ann.message}</p>
-                            <p class="text-sm text-gray-500 mt-2">Priority: ${ann.priority}</p>
+                        <div class="announcement-card">
+                            <h3 class="announcement-title">${ann.title}</h3>
+                            <p style="color: #4A5568; margin-top: 0.5rem;">${ann.message}</p>
+                            <p style="font-size: 0.9rem; color: #4A5568; margin-top: 0.5rem;">Priority: ${ann.priority}</p>
                         </div>
                     `).join('')}
                 </div>
@@ -383,21 +813,21 @@
         const container = document.getElementById('recentOrders');
         
         if (orders.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 text-center py-8">No recent orders</p>';
+            container.innerHTML = '<p style="color: #a0aec0; text-align: center; padding: 2rem;">No recent orders</p>';
             return;
         }
         
         container.innerHTML = `
             <div class="space-y-3">
                 ${orders.map(order => `
-                    <div class="flex justify-between items-center border-b pb-3">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem;">
                         <div>
-                            <p class="font-semibold">Order #${order.id}</p>
-                            <p class="text-sm text-gray-600">${order.items.length} items</p>
+                            <p style="font-weight: 700; color: #2D3748;">Order #${order.id}</p>
+                            <p style="font-size: 0.9rem; color: #4A5568;">${order.items.length} items</p>
                         </div>
-                        <div class="text-right">
-                            <p class="font-bold text-primary">$${order.total_price.toFixed(2)}</p>
-                            <p class="text-xs text-gray-500">${order.status}</p>
+                        <div style="text-align: right;">
+                            <p style="font-weight: 700; color: #4cb290;">₼${order.total_price.toFixed(2)}</p>
+                            <p style="font-size: 0.8rem; color: #4A5568;">${order.status}</p>
                         </div>
                     </div>
                 `).join('')}
