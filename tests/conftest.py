@@ -1,123 +1,402 @@
-# cafeteria-management-system/tests/conftest.py
+"""
+Pytest configuration and shared fixtures for all tests.
+This file provides common test fixtures and setup.
+"""
+import sys
+import os
+from datetime import datetime, timezone
+
+# Add src directory to Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
 import pytest
-from datetime import timedelta, datetime, timezone
-from app import create_app, db
-from models import User, UserRole, MenuItem, Order, OrderItem, Announcement
-from flask_jwt_extended import create_access_token
+from app import create_app
+from models import db, User, MenuItem, Order, OrderItem, Announcement
 
-@pytest.fixture(scope='session')
+
+@pytest.fixture(scope='function')
 def app():
-    """Create and configure a new app instance for testing."""
-    # Use the 'testing' configuration for in-memory SQLite DB
+    """Create and configure a test application instance."""
+    os.environ['FLASK_ENV'] = 'testing'
+    
     app = create_app('testing')
-    app.config["TESTING"] = True
-
+    app.config.update({
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        'SECRET_KEY': 'test-secret-key',
+        'JWT_SECRET_KEY': 'test-jwt-secret-key',
+        'WTF_CSRF_ENABLED': False,
+    })
+    
     with app.app_context():
         db.create_all()
         yield app
         db.session.remove()
         db.drop_all()
 
-@pytest.fixture
+
+@pytest.fixture(scope='function')
 def client(app):
-    """A test client for the app."""
+    """Create a test client for the app."""
     return app.test_client()
 
-@pytest.fixture
-def init_db(app):
-    """Fixture to ensure a clean database for each test."""
+
+@pytest.fixture(scope='function')
+def runner(app):
+    """Create a test CLI runner."""
+    return app.test_cli_runner()
+
+
+@pytest.fixture(scope='function')
+def session(app):
+    """Create a database session for tests."""
     with app.app_context():
-        # Clean slate for each test function
-        db.session.remove()
-        db.drop_all()
-        db.create_all()
-        yield db
+        yield db.session
+
+
+# ==================== User Fixtures ====================
 
 @pytest.fixture
-def users_data():
-    """Returns static data for test users."""
-    return {
-        'student': {'username': 'student_user', 'email': 'student@test.com', 'password': 'Password123!', 'role': UserRole.STUDENT},
-        'staff': {'username': 'staff_user', 'email': 'staff@test.com', 'password': 'Password123!', 'role': UserRole.STAFF},
-        'admin': {'username': 'admin_user', 'email': 'admin@test.com', 'password': 'Password123!', 'role': UserRole.ADMIN}
-    }
-
-@pytest.fixture
-def setup_users(init_db, users_data):
-    """Creates and commits test users to the database."""
-    users = {}
-    with init_db.app.app_context():
-        for role, data in users_data.items():
-            user = User(username=data['username'], email=data['email'], role=data['role'], is_verified=True)
-            user.set_password(data['password'])
-            init_db.session.add(user)
-            users[role] = user
-
-        # Add an unverified user for specific auth tests
-        unverified_user = User(username='unverified', email='unverified@t.com', role=UserRole.STUDENT)
-        unverified_user.set_password('Password123!')
-        init_db.session.add(unverified_user)
-        users['unverified'] = unverified_user
-
-        init_db.session.commit()
-        return users
-
-@pytest.fixture
-def get_auth_tokens(app, setup_users):
-    """Returns JWT access tokens for test users."""
-    tokens = {}
+def user(app):
+    """Create a regular verified user."""
     with app.app_context():
-        for role, user in setup_users.items():
-            # Use long expiry for testing purposes
-            access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=1))
-            tokens[role] = access_token
-        return tokens
+        user = User(
+            username='testuser',
+            email='test@example.com',
+            role='user'
+        )
+        user.set_password('TestPass123')
+        user.is_verified = True
+        user.is_active = True
+        db.session.add(user)
+        db.session.commit()
+        db.session.refresh(user)
+        return user
+
 
 @pytest.fixture
-def auth_headers(get_auth_tokens):
-    """Returns authorization headers for test users."""
-    headers = {}
-    for role, token in get_auth_tokens.items():
-        headers[role] = {
-            'Authorization': f'Bearer {token}',
-            'Content-Type': 'application/json'
-        }
-    return headers
+def unverified_user(app):
+    """Create an unverified user."""
+    with app.app_context():
+        user = User(
+            username='unverified',
+            email='unverified@example.com',
+            role='user'
+        )
+        user.set_password('TestPass123')
+        user.is_verified = False
+        user.is_active = True
+        verification_token = user.generate_verification_token()
+        db.session.add(user)
+        db.session.commit()
+        db.session.refresh(user)
+        return user
+
 
 @pytest.fixture
-def setup_menu(init_db):
-    """Creates and commits test menu items."""
-    with init_db.app.app_context():
-        menu_items = [
-            MenuItem(name="Burger", description="Beef patty", price=5.00, category="Main", is_available=True, stock=10),
-            MenuItem(name="Fries", description="Golden crispy fries", price=2.50, category="Side", is_available=True, stock=50),
-            MenuItem(name="Soda", description="Cola drink", price=1.50, category="Drink", is_available=False, stock=0),
-            MenuItem(name="Salad", description="Healthy garden salad", price=4.00, category="Main", is_available=True, stock=20)
+def inactive_user(app):
+    """Create an inactive user."""
+    with app.app_context():
+        user = User(
+            username='inactive',
+            email='inactive@example.com',
+            role='user'
+        )
+        user.set_password('TestPass123')
+        user.is_verified = True
+        user.is_active = False
+        db.session.add(user)
+        db.session.commit()
+        db.session.refresh(user)
+        return user
+
+
+@pytest.fixture
+def staff_user(app):
+    """Create a staff user."""
+    with app.app_context():
+        user = User(
+            username='staffuser',
+            email='staff@example.com',
+            role='staff'
+        )
+        user.set_password('StaffPass123')
+        user.is_verified = True
+        user.is_active = True
+        db.session.add(user)
+        db.session.commit()
+        db.session.refresh(user)
+        return user
+
+
+@pytest.fixture
+def admin_user(app):
+    """Create an admin user."""
+    with app.app_context():
+        user = User(
+            username='adminuser',
+            email='admin@example.com',
+            role='admin'
+        )
+        user.set_password('AdminPass123')
+        user.is_verified = True
+        user.is_active = True
+        db.session.add(user)
+        db.session.commit()
+        db.session.refresh(user)
+        return user
+
+
+# ==================== Authentication Fixtures ====================
+
+@pytest.fixture
+def user_token(client, user):
+    """Get JWT token for regular user."""
+    response = client.post('/api/auth/login', json={
+        'username': 'testuser',
+        'password': 'TestPass123'
+    })
+    return response.get_json()['access_token']
+
+
+@pytest.fixture
+def staff_token(client, staff_user):
+    """Get JWT token for staff user."""
+    response = client.post('/api/auth/login', json={
+        'username': 'staffuser',
+        'password': 'StaffPass123'
+    })
+    return response.get_json()['access_token']
+
+
+@pytest.fixture
+def admin_token(client, admin_user):
+    """Get JWT token for admin user."""
+    response = client.post('/api/auth/login', json={
+        'username': 'adminuser',
+        'password': 'AdminPass123'
+    })
+    return response.get_json()['access_token']
+
+
+@pytest.fixture
+def auth_headers(user_token):
+    """Get authorization headers with user token."""
+    return {'Authorization': f'Bearer {user_token}'}
+
+
+@pytest.fixture
+def staff_headers(staff_token):
+    """Get authorization headers with staff token."""
+    return {'Authorization': f'Bearer {staff_token}'}
+
+
+@pytest.fixture
+def admin_headers(admin_token):
+    """Get authorization headers with admin token."""
+    return {'Authorization': f'Bearer {admin_token}'}
+
+
+# ==================== Menu Fixtures ====================
+
+@pytest.fixture
+def menu_items(app):
+    """Create sample menu items."""
+    with app.app_context():
+        items = [
+            MenuItem(
+                name='Coffee',
+                description='Fresh brewed coffee',
+                price=2.50,
+                category='beverages',
+                is_available=True,
+                stock_quantity=100
+            ),
+            MenuItem(
+                name='Cappuccino',
+                description='Espresso with steamed milk',
+                price=3.50,
+                category='beverages',
+                is_available=True,
+                stock_quantity=50
+            ),
+            MenuItem(
+                name='Burger',
+                description='Classic beef burger',
+                price=8.99,
+                category='food',
+                is_available=True,
+                stock_quantity=30
+            ),
+            MenuItem(
+                name='Pizza Slice',
+                description='Cheese pizza',
+                price=4.50,
+                category='food',
+                is_available=True,
+                stock_quantity=20
+            ),
+            MenuItem(
+                name='Unavailable Item',
+                description='Out of stock',
+                price=5.00,
+                category='snacks',
+                is_available=False,
+                stock_quantity=0
+            )
         ]
-        init_db.session.add_all(menu_items)
-        init_db.session.commit()
-        return {item.name: item for item in menu_items}
+        
+        for item in items:
+            db.session.add(item)
+        
+        db.session.commit()
+        
+        for item in items:
+            db.session.refresh(item)
+        
+        return items
+
 
 @pytest.fixture
-def setup_orders(init_db, setup_users, setup_menu):
-    """Creates a couple of test orders."""
-    from src.order import OrderHandler 
+def menu_item(app):
+    """Create a single menu item."""
+    with app.app_context():
+        item = MenuItem(
+            name='Test Item',
+            description='Test description',
+            price=5.99,
+            category='food',
+            is_available=True,
+            stock_quantity=50
+        )
+        db.session.add(item)
+        db.session.commit()
+        db.session.refresh(item)
+        return item
 
-    user_id = setup_users['student'].id
-    item_id_1 = setup_menu['Burger'].id
-    item_id_2 = setup_menu['Fries'].id
 
-    with init_db.app.app_context():
-        # Order 1 (New, Unpaid)
-        order1 = OrderHandler.create_order(user_id)
-        OrderHandler.add_item(order1.id, item_id_1, 2)
-        OrderHandler.add_item(order1.id, item_id_2, 1)
+# ==================== Order Fixtures ====================
 
-        # Order 2 (Completed and Paid)
-        order2 = OrderHandler.create_order(user_id)
-        OrderHandler.update_status(order2.id, 'completed')
-        OrderHandler.mark_paid(order2.id)
+@pytest.fixture
+def order(app, user, menu_items):
+    """Create a sample order with items."""
+    with app.app_context():
+        order = Order(
+            user_id=user.id,
+            status='pending',
+            is_paid=False
+        )
+        db.session.add(order)
+        db.session.flush()
+        
+        # Add order items
+        order_item1 = OrderItem(
+            order_id=order.id,
+            menu_item_id=menu_items[0].id,
+            quantity=2,
+            unit_price=menu_items[0].price
+        )
+        order_item2 = OrderItem(
+            order_id=order.id,
+            menu_item_id=menu_items[2].id,
+            quantity=1,
+            unit_price=menu_items[2].price
+        )
+        
+        db.session.add_all([order_item1, order_item2])
+        db.session.commit()
+        db.session.refresh(order)
+        return order
 
-        init_db.session.commit()
-        return [order1, order2]
+
+@pytest.fixture
+def completed_order(app, user, menu_items):
+    """Create a completed order."""
+    with app.app_context():
+        order = Order(
+            user_id=user.id,
+            status='completed',
+            is_paid=True,
+            completed_at=datetime.now(timezone.utc)
+        )
+        db.session.add(order)
+        db.session.flush()
+        
+        order_item = OrderItem(
+            order_id=order.id,
+            menu_item_id=menu_items[0].id,
+            quantity=1,
+            unit_price=menu_items[0].price
+        )
+        
+        db.session.add(order_item)
+        db.session.commit()
+        db.session.refresh(order)
+        return order
+
+
+# ==================== Announcement Fixtures ====================
+
+@pytest.fixture
+def announcement(app, admin_user):
+    """Create a sample announcement."""
+    with app.app_context():
+        announcement = Announcement(
+            title='Test Announcement',
+            message='This is a test announcement',
+            priority='normal',
+            is_active=True,
+            created_by=admin_user.id
+        )
+        db.session.add(announcement)
+        db.session.commit()
+        db.session.refresh(announcement)
+        return announcement
+
+
+@pytest.fixture
+def expired_announcement(app, admin_user):
+    """Create an expired announcement."""
+    with app.app_context():
+        from datetime import timedelta
+        announcement = Announcement(
+            title='Expired Announcement',
+            message='This announcement has expired',
+            priority='normal',
+            is_active=True,
+            created_by=admin_user.id,
+            expires_at=datetime.now(timezone.utc) - timedelta(days=1)
+        )
+        db.session.add(announcement)
+        db.session.commit()
+        db.session.refresh(announcement)
+        return announcement
+
+
+# ==================== Helper Functions ====================
+
+def get_json(response):
+    """Extract JSON from response."""
+    return response.get_json()
+
+
+def assert_success(response, status_code=200):
+    """Assert response is successful."""
+    assert response.status_code == status_code
+    assert response.is_json
+
+
+def assert_error(response, status_code, error_message=None):
+    """Assert response contains error."""
+    assert response.status_code == status_code
+    data = get_json(response)
+    assert 'error' in data
+    if error_message:
+        assert error_message.lower() in data['error'].lower()
+
+
+# Make helper functions available to all tests
+pytest.get_json = get_json
+pytest.assert_success = assert_success
+pytest.assert_error = assert_error
