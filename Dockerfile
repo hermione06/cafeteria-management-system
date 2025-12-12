@@ -2,7 +2,7 @@
 FROM python:3.10-slim
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /src
 
 # Copy the requirements file and install dependencies
 COPY requirements.txt .
