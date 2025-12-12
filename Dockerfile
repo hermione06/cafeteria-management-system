@@ -24,7 +24,7 @@ RUN mkdir -p /app/instance && chmod 777 /app/instance
 EXPOSE 5000
 
 # Set environment variables
-ENV FLASK_APP=app.py
+ENV FLASK_APP=src/app.py
 ENV PYTHONUNBUFFERED=1
 
 # Use Gunicorn for production (more stable than Flask dev server)
