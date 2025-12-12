@@ -56,7 +56,28 @@ def admin_user(app):
         user.set_password('admin123')
         db.session.add(user)
         db.session.commit()
-        return user
+        
+        # Store all needed attributes
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.role,
+            'is_active': user.is_active,
+            'is_verified': user.is_verified
+        }
+        
+    # Create a reference object with all attributes
+    class UserRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.username = data['username']
+            self.email = data['email']
+            self.role = data['role']
+            self.is_active = data['is_active']
+            self.is_verified = data['is_verified']
+    
+    return UserRef(user_data)
 
 
 @pytest.fixture
@@ -73,7 +94,26 @@ def staff_user(app):
         user.set_password('staff123')
         db.session.add(user)
         db.session.commit()
-        return user
+        
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.role,
+            'is_active': user.is_active,
+            'is_verified': user.is_verified
+        }
+        
+    class UserRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.username = data['username']
+            self.email = data['email']
+            self.role = data['role']
+            self.is_active = data['is_active']
+            self.is_verified = data['is_verified']
+    
+    return UserRef(user_data)
 
 
 @pytest.fixture
@@ -90,7 +130,26 @@ def regular_user(app):
         user.set_password('user123')
         db.session.add(user)
         db.session.commit()
-        return user
+        
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.role,
+            'is_active': user.is_active,
+            'is_verified': user.is_verified
+        }
+        
+    class UserRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.username = data['username']
+            self.email = data['email']
+            self.role = data['role']
+            self.is_active = data['is_active']
+            self.is_verified = data['is_verified']
+    
+    return UserRef(user_data)
 
 
 @pytest.fixture
@@ -107,7 +166,26 @@ def inactive_user(app):
         user.set_password('inactive123')
         db.session.add(user)
         db.session.commit()
-        return user
+        
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.role,
+            'is_active': user.is_active,
+            'is_verified': user.is_verified
+        }
+        
+    class UserRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.username = data['username']
+            self.email = data['email']
+            self.role = data['role']
+            self.is_active = data['is_active']
+            self.is_verified = data['is_verified']
+    
+    return UserRef(user_data)
 
 
 # ==================== TOKEN FIXTURES ====================
@@ -116,11 +194,13 @@ def inactive_user(app):
 def admin_token(app, admin_user):
     """Create admin JWT token"""
     with app.app_context():
+        # Query the user fresh from database in this context
+        user = db.session.get(User, admin_user.id)
         return create_access_token(
-            identity=admin_user.id,
+            identity=user.id,
             additional_claims={
-                'role': admin_user.role,
-                'username': admin_user.username
+                'role': user.role,
+                'username': user.username
             }
         )
 
@@ -129,11 +209,12 @@ def admin_token(app, admin_user):
 def staff_token(app, staff_user):
     """Create staff JWT token"""
     with app.app_context():
+        user = db.session.get(User, staff_user.id)
         return create_access_token(
-            identity=staff_user.id,
+            identity=user.id,
             additional_claims={
-                'role': staff_user.role,
-                'username': staff_user.username
+                'role': user.role,
+                'username': user.username
             }
         )
 
@@ -142,11 +223,12 @@ def staff_token(app, staff_user):
 def user_token(app, regular_user):
     """Create regular user JWT token"""
     with app.app_context():
+        user = db.session.get(User, regular_user.id)
         return create_access_token(
-            identity=regular_user.id,
+            identity=user.id,
             additional_claims={
-                'role': regular_user.role,
-                'username': regular_user.username
+                'role': user.role,
+                'username': user.username
             }
         )
 
@@ -185,7 +267,28 @@ def menu_item(app):
         )
         db.session.add(item)
         db.session.commit()
-        return item
+        
+        item_data = {
+            'id': item.id,
+            'name': item.name,
+            'description': item.description,
+            'price': item.price,
+            'category': item.category,
+            'is_available': item.is_available,
+            'stock_quantity': item.stock_quantity
+        }
+        
+    class ItemRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.name = data['name']
+            self.description = data['description']
+            self.price = data['price']
+            self.category = data['category']
+            self.is_available = data['is_available']
+            self.stock_quantity = data['stock_quantity']
+    
+    return ItemRef(item_data)
 
 
 @pytest.fixture
@@ -202,7 +305,28 @@ def unavailable_menu_item(app):
         )
         db.session.add(item)
         db.session.commit()
-        return item
+        
+        item_data = {
+            'id': item.id,
+            'name': item.name,
+            'description': item.description,
+            'price': item.price,
+            'category': item.category,
+            'is_available': item.is_available,
+            'stock_quantity': item.stock_quantity
+        }
+        
+    class ItemRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.name = data['name']
+            self.description = data['description']
+            self.price = data['price']
+            self.category = data['category']
+            self.is_available = data['is_available']
+            self.stock_quantity = data['stock_quantity']
+    
+    return ItemRef(item_data)
 
 
 @pytest.fixture
@@ -253,7 +377,31 @@ def multiple_menu_items(app):
         ]
         db.session.add_all(items)
         db.session.commit()
-        return items
+        
+        # Store all item data
+        items_data = []
+        for item in items:
+            items_data.append({
+                'id': item.id,
+                'name': item.name,
+                'description': item.description,
+                'price': item.price,
+                'category': item.category,
+                'is_available': item.is_available,
+                'stock_quantity': item.stock_quantity
+            })
+        
+    class ItemRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.name = data['name']
+            self.description = data['description']
+            self.price = data['price']
+            self.category = data['category']
+            self.is_available = data['is_available']
+            self.stock_quantity = data['stock_quantity']
+    
+    return [ItemRef(item_data) for item_data in items_data]
 
 
 # ==================== ORDER FIXTURES ====================
@@ -278,7 +426,38 @@ def order(app, regular_user, menu_item):
         )
         db.session.add(order_item)
         db.session.commit()
-        return order
+        
+        order_id = order.id
+        
+    class OrderRef:
+        def __init__(self, id):
+            self.id = id
+            # Add a mock items attribute for tests that access order.items
+            self._items = None
+            
+        @property
+        def items(self):
+            # This will be used by tests - need to return a mock that has .first()
+            class ItemsQuery:
+                def __init__(self, order_id):
+                    self.order_id = order_id
+                    
+                def first(self):
+                    # Return a mock order item with an id
+                    class OrderItemRef:
+                        def __init__(self, order_id):
+                            # We need to query the actual order item id
+                            from src.app import create_app
+                            from src.models import db, OrderItem
+                            app = create_app('testing')
+                            with app.app_context():
+                                item = db.session.query(OrderItem).filter_by(order_id=order_id).first()
+                                self.id = item.id if item else 1
+                    return OrderItemRef(self.order_id)
+            
+            return ItemsQuery(self.id)
+    
+    return OrderRef(order_id)
 
 
 @pytest.fixture
@@ -303,14 +482,41 @@ def completed_order(app, regular_user, menu_item):
         )
         db.session.add(order_item)
         db.session.commit()
-        return order
+        
+        order_id = order.id
+        
+    class OrderRef:
+        def __init__(self, id):
+            self.id = id
+            self._items = None
+            
+        @property
+        def items(self):
+            class ItemsQuery:
+                def __init__(self, order_id):
+                    self.order_id = order_id
+                    
+                def first(self):
+                    class OrderItemRef:
+                        def __init__(self, order_id):
+                            from src.app import create_app
+                            from src.models import db, OrderItem
+                            app = create_app('testing')
+                            with app.app_context():
+                                item = db.session.query(OrderItem).filter_by(order_id=order_id).first()
+                                self.id = item.id if item else 1
+                    return OrderItemRef(self.order_id)
+            
+            return ItemsQuery(self.id)
+    
+    return OrderRef(order_id)
 
 
 @pytest.fixture
 def multiple_orders(app, regular_user, multiple_menu_items):
     """Create multiple orders"""
     with app.app_context():
-        orders = []
+        order_ids = []
         
         # Pending order
         order1 = Order(
@@ -328,7 +534,7 @@ def multiple_orders(app, regular_user, multiple_menu_items):
             unit_price=multiple_menu_items[0].price
         )
         db.session.add(order_item1)
-        orders.append(order1)
+        order_ids.append(order1.id)
         
         # Completed order
         order2 = Order(
@@ -347,10 +553,15 @@ def multiple_orders(app, regular_user, multiple_menu_items):
             unit_price=multiple_menu_items[2].price
         )
         db.session.add(order_item2)
-        orders.append(order2)
+        order_ids.append(order2.id)
         
         db.session.commit()
-        return orders
+        
+    class OrderRef:
+        def __init__(self, id):
+            self.id = id
+    
+    return [OrderRef(order_id) for order_id in order_ids]
 
 
 # ==================== ANNOUNCEMENT FIXTURES ====================
@@ -368,7 +579,24 @@ def announcement(app, admin_user):
         )
         db.session.add(announcement)
         db.session.commit()
-        return announcement
+        
+        ann_data = {
+            'id': announcement.id,
+            'title': announcement.title,
+            'message': announcement.message,
+            'priority': announcement.priority,
+            'is_active': announcement.is_active
+        }
+        
+    class AnnouncementRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.title = data['title']
+            self.message = data['message']
+            self.priority = data['priority']
+            self.is_active = data['is_active']
+    
+    return AnnouncementRef(ann_data)
 
 
 @pytest.fixture
@@ -385,7 +613,24 @@ def expired_announcement(app, admin_user):
         )
         db.session.add(announcement)
         db.session.commit()
-        return announcement
+        
+        ann_data = {
+            'id': announcement.id,
+            'title': announcement.title,
+            'message': announcement.message,
+            'priority': announcement.priority,
+            'is_active': announcement.is_active
+        }
+        
+    class AnnouncementRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.title = data['title']
+            self.message = data['message']
+            self.priority = data['priority']
+            self.is_active = data['is_active']
+    
+    return AnnouncementRef(ann_data)
 
 
 @pytest.fixture
@@ -424,4 +669,24 @@ def multiple_announcements(app, admin_user):
         ]
         db.session.add_all(announcements)
         db.session.commit()
-        return announcements
+        
+        # Store all announcement data
+        ann_data_list = []
+        for ann in announcements:
+            ann_data_list.append({
+                'id': ann.id,
+                'title': ann.title,
+                'message': ann.message,
+                'priority': ann.priority,
+                'is_active': ann.is_active
+            })
+        
+    class AnnouncementRef:
+        def __init__(self, data):
+            self.id = data['id']
+            self.title = data['title']
+            self.message = data['message']
+            self.priority = data['priority']
+            self.is_active = data['is_active']
+    
+    return [AnnouncementRef(ann_data) for ann_data in ann_data_list]

@@ -1,62 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard - CafeHub{% endblock %}
+{% block title %}Admin Dashboard - Bounty Cafeteria{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
 
 {% block content %}
+<!-- Page Header -->
+<div class="admin-header">
+    <div class="gradient-box-admin">
+        <h1 class="admin-title">admin</h1>
+    </div>
+    <p class="admin-subtitle">MANAGE YOUR CAFETERIA OPERATIONS</p>
+</div>
+
 <!-- Welcome Section -->
-<div class="gradient-bg rounded-2xl shadow-2xl p-8 mb-8 text-white">
-    <h1 class="text-3xl font-bold mb-2">
+<div class="welcome-section">
+    <h2 class="welcome-title">
         <i class="fas fa-shield-alt mr-3"></i> Admin Dashboard
-    </h1>
-    <p class="text-white/80">Manage your cafeteria operations</p>
+    </h2>
+    <p class="welcome-text">Manage your cafeteria operations</p>
 </div>
 
 <!-- Stats Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="stats-card">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Total Users</p>
-                <p class="text-3xl font-bold text-gray-800" id="totalUsers">0</p>
+                <p class="stats-label">Total Users</p>
+                <p class="stats-value" id="totalUsers">0</p>
             </div>
-            <div class="bg-blue-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-users text-2xl text-blue-600"></i>
+            <div class="stats-icon icon-azure">
+                <i class="fas fa-users"></i>
             </div>
         </div>
     </div>
     
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="stats-card">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Total Orders</p>
-                <p class="text-3xl font-bold text-gray-800" id="totalOrders">0</p>
+                <p class="stats-label">Total Orders</p>
+                <p class="stats-value" id="totalOrders">0</p>
             </div>
-            <div class="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-shopping-cart text-2xl text-green-600"></i>
+            <div class="stats-icon icon-green">
+                <i class="fas fa-shopping-cart"></i>
             </div>
         </div>
     </div>
     
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="stats-card">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Menu Items</p>
-                <p class="text-3xl font-bold text-gray-800" id="totalMenuItems">0</p>
+                <p class="stats-label">Menu Items</p>
+                <p class="stats-value" id="totalMenuItems">0</p>
             </div>
-            <div class="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-utensils text-2xl text-purple-600"></i>
+            <div class="stats-icon icon-coral">
+                <i class="fas fa-utensils"></i>
             </div>
         </div>
     </div>
     
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="stats-card">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Revenue</p>
-                <p class="text-3xl font-bold text-gray-800">$<span id="totalRevenue">0</span></p>
+                <p class="stats-label">Revenue</p>
+                <p class="stats-value">₼<span id="totalRevenue">0</span></p>
             </div>
-            <div class="bg-yellow-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-dollar-sign text-2xl text-yellow-600"></i>
+            <div class="stats-icon icon-yellow">
+                <i class="fas fa-dollar-sign"></i>
             </div>
         </div>
     </div>
@@ -64,52 +76,52 @@
 
 <!-- Quick Actions -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <button onclick="showSection('users')" class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl transition transform hover:-translate-y-1">
-        <i class="fas fa-users text-3xl mb-3"></i>
-        <h3 class="text-lg font-bold">Manage Users</h3>
+    <button onclick="showSection('users')" class="action-btn action-users">
+        <i class="fas fa-users"></i>
+        <h3>Manage Users</h3>
     </button>
     
-    <button onclick="showSection('menu')" class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl transition transform hover:-translate-y-1">
-        <i class="fas fa-utensils text-3xl mb-3"></i>
-        <h3 class="text-lg font-bold">Manage Menu</h3>
+    <button onclick="showSection('menu')" class="action-btn action-menu">
+        <i class="fas fa-utensils"></i>
+        <h3>Manage Menu</h3>
     </button>
     
-    <button onclick="showSection('orders')" class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl transition transform hover:-translate-y-1">
-        <i class="fas fa-shopping-cart text-3xl mb-3"></i>
-        <h3 class="text-lg font-bold">Manage Orders</h3>
+    <button onclick="showSection('orders')" class="action-btn action-orders">
+        <i class="fas fa-shopping-cart"></i>
+        <h3>Manage Orders</h3>
     </button>
     
-    <button onclick="showSection('announcements')" class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl transition transform hover:-translate-y-1">
-        <i class="fas fa-bullhorn text-3xl mb-3"></i>
-        <h3 class="text-lg font-bold">Announcements</h3>
+    <button onclick="showSection('announcements')" class="action-btn action-announcements">
+        <i class="fas fa-bullhorn"></i>
+        <h3>Announcements</h3>
     </button>
 </div>
 
 <!-- Management Sections -->
-<div id="usersSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
-    <h2 class="text-2xl font-bold mb-4"><i class="fas fa-users mr-2"></i> User Management</h2>
+<div id="usersSection" class="hidden management-section">
+    <h2 class="section-title"><i class="fas fa-users mr-2"></i> User Management</h2>
     <div id="usersList"></div>
 </div>
 
-<div id="menuSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold"><i class="fas fa-utensils mr-2"></i> Menu Management</h2>
-        <button onclick="showAddMenuItem()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+<div id="menuSection" class="hidden management-section">
+    <div class="section-header">
+        <h2 class="section-title"><i class="fas fa-utensils mr-2"></i> Menu Management</h2>
+        <button onclick="showAddMenuItem()" class="add-btn">
             <i class="fas fa-plus mr-2"></i> Add Item
         </button>
     </div>
     <div id="menuList"></div>
 </div>
 
-<div id="ordersSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
-    <h2 class="text-2xl font-bold mb-4"><i class="fas fa-shopping-cart mr-2"></i> Order Management</h2>
+<div id="ordersSection" class="hidden management-section">
+    <h2 class="section-title"><i class="fas fa-shopping-cart mr-2"></i> Order Management</h2>
     <div id="ordersList"></div>
 </div>
 
-<div id="announcementsSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold"><i class="fas fa-bullhorn mr-2"></i> Announcements</h2>
-        <button onclick="showAddAnnouncement()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+<div id="announcementsSection" class="hidden management-section">
+    <div class="section-header">
+        <h2 class="section-title"><i class="fas fa-bullhorn mr-2"></i> Announcements</h2>
+        <button onclick="showAddAnnouncement()" class="add-btn">
             <i class="fas fa-plus mr-2"></i> New Announcement
         </button>
     </div>
@@ -117,43 +129,43 @@
 </div>
 
 <!-- Recent Activity -->
-<div class="bg-white rounded-xl shadow-lg p-6">
-    <h2 class="text-2xl font-bold mb-4"><i class="fas fa-history mr-2"></i> Recent Orders</h2>
+<div class="management-section">
+    <h2 class="section-title"><i class="fas fa-history mr-2"></i> Recent Orders</h2>
     <div id="recentOrders"></div>
 </div>
 
 <!-- Add Menu Item Modal -->
-<div id="addMenuModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-        <div class="gradient-bg p-6 text-white flex justify-between items-center">
-            <h2 class="text-2xl font-bold">Add Menu Item</h2>
-            <button onclick="closeAddMenuItem()" class="text-white hover:text-gray-200">
-                <i class="fas fa-times text-2xl"></i>
+<div id="addMenuModal" class="hidden modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add Menu Item</h2>
+            <button onclick="closeAddMenuItem()" class="modal-close">
+                <i class="fas fa-times"></i>
             </button>
         </div>
-        <form id="addMenuForm" class="p-6 space-y-4">
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Name</label>
-                <input type="text" name="name" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+        <form id="addMenuForm" class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" required class="form-input">
             </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Description</label>
-                <textarea name="description" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"></textarea>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" rows="3" class="form-textarea"></textarea>
             </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Price</label>
-                <input type="number" name="price" step="0.01" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+            <div class="form-group">
+                <label class="form-label">Price</label>
+                <input type="number" name="price" step="0.01" required class="form-input">
             </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Category</label>
-                <select name="category" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select name="category" required class="form-select">
                     <option value="beverages">Beverages</option>
                     <option value="food">Food</option>
                     <option value="snacks">Snacks</option>
                     <option value="desserts">Desserts</option>
                 </select>
             </div>
-            <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition">
+            <button type="submit" class="submit-btn">
                 <i class="fas fa-plus mr-2"></i> Add Item
             </button>
         </form>

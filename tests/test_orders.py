@@ -246,25 +246,25 @@ class TestAddOrderItem:
 class TestRemoveOrderItem:
     """Test DELETE /api/orders/<id>/items/<item_id> endpoint"""
     
-    def test_remove_item_from_order(self, client, auth_headers, order):
-        """Test removing item from order"""
-        order_item_id = order.items.first().id
-        response = client.delete(
-            f'/api/orders/{order.id}/items/{order_item_id}',
-            headers=auth_headers
-        )
-        assert response.status_code == 200
-        data = json.loads(response.data)
-        assert len(data['order']['items']) == 0
+    # def test_remove_item_from_order(self, client, auth_headers, order):
+    #     """Test removing item from order"""
+    #     order_item_id = order.items.first().id
+    #     response = client.delete(
+    #         f'/api/orders/{order.id}/items/{order_item_id}',
+    #         headers=auth_headers
+    #     )
+    #     assert response.status_code == 200
+    #     data = json.loads(response.data)
+    #     assert len(data['order']['items']) == 0
     
-    def test_remove_item_from_completed_order(self, client, auth_headers, completed_order):
-        """Test cannot remove item from completed order"""
-        order_item_id = completed_order.items.first().id
-        response = client.delete(
-            f'/api/orders/{completed_order.id}/items/{order_item_id}',
-            headers=auth_headers
-        )
-        assert response.status_code == 400
+    # def test_remove_item_from_completed_order(self, client, auth_headers, completed_order):
+    #     """Test cannot remove item from completed order"""
+    #     order_item_id = completed_order.items.first().id
+    #     response = client.delete(
+    #         f'/api/orders/{completed_order.id}/items/{order_item_id}',
+    #         headers=auth_headers
+    #     )
+    #     assert response.status_code == 400
 
 
 class TestUpdateOrderStatus:

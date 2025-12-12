@@ -11,6 +11,9 @@ gunicorn==21.2.0
 # Database drivers
 psycopg2-binary==2.9.9  # PostgreSQL (optional)
 
+
+gunicorn
+
 # Development dependencies (optional)
 pytest==7.4.3
 pytest-cov==4.1.0
