@@ -79,8 +79,8 @@
         <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center text-white font-bold">
             <!-- Left -->
             <div class="flex space-x-10 tracking-wide flex-1">
-                <a href="/">HOME</a>
-                <a href="/menu">MENU</a>
+                <a href="/" class="hover:opacity-80 transition">HOME</a>
+                <a href="/menu" class="hover:opacity-80 transition">MENU</a>
             </div>
 
             <!-- Center -->
@@ -93,15 +93,40 @@
             </div>
 
             <!-- Right -->
-            <div class="flex space-x-10 tracking-wide flex-1 justify-end">
-                {% if session.role == 'admin' %}
-                    <a href="/orders">ORDERS</a>
-                    <a href="/dashboard">DASHBOARD</a>
-                {% elif session.user_id %}
-                    <a href="/cart">CART</a>
-                    <a href="/account">ACCOUNT</a>
+            <div class="flex space-x-10 tracking-wide flex-1 justify-end items-center">
+                {% if session.user_id %}
+                    <a href="/dashboard" class="hover:opacity-80 transition">
+                        <i class="fas fa-home mr-1"></i> DASHBOARD
+                    </a>
+                    <a href="/orders" class="hover:opacity-80 transition">
+                        <i class="fas fa-shopping-cart mr-1"></i> ORDERS
+                    </a>
+                    {% if session.role == 'admin' %}
+                    <a href="/admin" class="hover:opacity-80 transition">
+                        <i class="fas fa-cog mr-1"></i> ADMIN
+                    </a>
+                    {% endif %}
+                    <div class="relative" id="userMenu">
+                        <button class="flex items-center space-x-2 hover:opacity-80 transition" onclick="toggleUserMenu()">
+                            <i class="fas fa-user-circle text-2xl"></i>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                            <a href="/profile" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user mr-2"></i> Profile
+                            </a>
+                            <a href="/settings" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-cog mr-2"></i> Settings
+                            </a>
+                            <hr class="my-1">
+                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                            </button>
+                        </div>
+                    </div>
                 {% else %}
-                    <a href="/login">LOGIN</a>
+                    <a href="/login" class="hover:opacity-80 transition">LOGIN</a>
+                    <a href="/register" class="hover:opacity-80 transition">SIGN UP</a>
                 {% endif %}
             </div>
         </div>

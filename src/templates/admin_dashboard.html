@@ -180,11 +180,7 @@
     // Load dashboard stats
     async function loadStats() {
         try {
-            const [usersData, ordersData, menuData] = await Promise.all([
-                apiRequest('/users/stats'),
-                apiRequest('/orders'),
-                apiRequest('/menu?available=false&per_page=1000')
-            ]);
+z
             
             document.getElementById('totalUsers').textContent = usersData.total_users || 0;
             document.getElementById('totalOrders').textContent = ordersData.orders?.length || 0;

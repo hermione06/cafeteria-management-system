@@ -17,6 +17,7 @@
         <h1 class="bounty-title">bounty</h1>
         <p class="bounty-subtitle">UFAZ CAFETERIA — MADE SIMPLE</p>
         <button class="announcements-btn" onclick="openAnnouncementsPopup()">View Announcements</button>
+        <button class="announcements-btn" onclick="openPopularItemsPopup()" style="margin-top: 10px;">Popular Items</button>
     </div>
     
     <!-- Right Side: Buttons -->
@@ -50,6 +51,8 @@
              class="absolute left-[1150px] top-[-100px] w-[650px] rotate-[-10deg] opacity-100">
     </div>
 </div>
+
+
 
 <!-- Why Bounty Popup -->
 <div id="whyBountyPopup" class="popup-overlay" onclick="closePopupOnOverlay(event)">
@@ -110,6 +113,17 @@
     </div>
 </div>
 
+<!-- Popular Items Popup -->
+<div id="popularItemsPopup" class="popup-overlay" onclick="closePopupOnOverlay(event)">
+    <div class="popup-content">
+        <button class="popup-close" onclick="closePopularItemsPopup()">&times;</button>
+        <h2 class="popup-title">🍽️ Popular Items</h2>
+        <div id="popularItemsPopupContent" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Popular items will be loaded here -->
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -122,7 +136,7 @@
     
     function closeWhyBountyPopup() {
         document.getElementById('whyBountyPopup').classList.remove('active');
-        document.body.style.overflow = 'auto';
+        document.body.style.overflow = '';
     }
     
     function openAnnouncementsPopup() {
@@ -133,7 +147,18 @@
     
     function closeAnnouncementsPopup() {
         document.getElementById('announcementsPopup').classList.remove('active');
-        document.body.style.overflow = 'auto';
+        document.body.style.overflow = '';
+    }
+    
+    function openPopularItemsPopup() {
+        loadPopularItemsPopup();
+        document.getElementById('popularItemsPopup').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closePopularItemsPopup() {
+        document.getElementById('popularItemsPopup').classList.remove('active');
+        document.body.style.overflow = '';
     }
     
     function closePopupOnOverlay(event) {
@@ -143,6 +168,9 @@
         if (event.target.id === 'announcementsPopup') {
             closeAnnouncementsPopup();
         }
+        if (event.target.id === 'popularItemsPopup') {
+            closePopularItemsPopup();
+        }
     }
     
     // Close popup with Escape key
@@ -150,52 +178,9 @@
         if (event.key === 'Escape') {
             closeWhyBountyPopup();
             closeAnnouncementsPopup();
+            closePopularItemsPopup();
         }
     });
-    
-    // Smooth scroll to announcements section (kept for compatibility)
-    function scrollToAnnouncements(event) {
-        event.preventDefault();
-        const element = document.getElementById('announcementsSection');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }
-    
-    // Load announcements
-    async function loadAnnouncements() {
-        try {
-            const response = await fetch(`${API_BASE}/announcements`);
-            const data = await response.json();
-            
-            if (data.announcements && data.announcements.length > 0) {
-                const container = document.getElementById('announcementsSection');
-                const activeAnnouncements = data.announcements.filter(a => 
-                    a.title !== "No announcements yet"
-                );
-                
-                if (activeAnnouncements.length > 0) {
-                    container.innerHTML = `
-                        <div class="bg-white rounded-3xl p-8 shadow-xl max-w-5xl mx-auto border-l-8" style="border-color: #4FB3BF;">
-                            <h3 class="text-3xl font-bold mb-6" style="font-family: 'Fredoka', sans-serif; color: #2D3748;">
-                                📢 Announcements
-                            </h3>
-                            <div class="space-y-4">
-                                ${activeAnnouncements.map(ann => `
-                                    <div class="bg-gray-50 p-5 rounded-2xl">
-                                        <h4 class="font-bold text-lg" style="font-family: 'Fredoka', sans-serif; color: #2D3748;">${ann.title}</h4>
-                                        <p class="mt-2" style="font-family: 'Fredoka', sans-serif; color: #4A5568;">${ann.message}</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-        } catch (error) {
-            console.error('Error loading announcements:', error);
-        }
-    }
     
     // Load announcements for popup
     async function loadAnnouncementsPopup() {
@@ -257,9 +242,101 @@
         }
     }
     
+    // Load popular items for popup
+    async function loadPopularItemsPopup() {
+        try {
+            const response = await fetch(`${API_BASE}/menu?available=true&per_page=6`);
+            const data = await response.json();
+            
+            const container = document.getElementById('popularItemsPopupContent');
+            
+            if (data.items && data.items.length > 0) {
+                container.innerHTML = data.items.map(item => `
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-2">
+                        <div class="h-32 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                            <i class="fas fa-utensils text-5xl text-white"></i>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-lg font-bold mb-2" style="font-family: 'Fredoka', sans-serif; color: #2D3748;">${item.name}</h3>
+                            <p class="text-gray-600 mb-3 text-sm" style="font-family: 'Fredoka', sans-serif;">${item.description || 'Delicious and fresh'}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xl font-bold" style="color: #4FB3BF; font-family: 'Fredoka', sans-serif;">₼${item.price.toFixed(2)}</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs" style="font-family: 'Fredoka', sans-serif;">
+                                    <i class="fas fa-check-circle mr-1"></i> Available
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="col-span-full text-center text-gray-500 py-12">
+                        <i class="fas fa-utensils text-6xl mb-4"></i>
+                        <p class="text-xl" style="font-family: 'Fredoka', sans-serif;">No items available at the moment</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading popular items popup:', error);
+            const container = document.getElementById('popularItemsPopupContent');
+            container.innerHTML = `
+                <div class="col-span-full text-center text-gray-500 py-12">
+                    <i class="fas fa-exclamation-triangle text-6xl mb-4"></i>
+                    <p class="text-xl" style="font-family: 'Fredoka', sans-serif;">Unable to load items. Please try again later.</p>
+                </div>
+            `;
+        }
+    }
+    
+    // Load popular items
+    async function loadPopularItems() {
+        try {
+            const response = await fetch(`${API_BASE}/menu?available=true&per_page=4`);
+            const data = await response.json();
+            
+            const container = document.getElementById('popularItems');
+            
+            if (data.items && data.items.length > 0) {
+                container.innerHTML = data.items.map(item => `
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-2">
+                        <div class="h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                            <i class="fas fa-utensils text-6xl text-white"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2" style="font-family: 'Fredoka', sans-serif; color: #2D3748;">${item.name}</h3>
+                            <p class="text-gray-600 mb-4 text-sm" style="font-family: 'Fredoka', sans-serif;">${item.description || 'Delicious and fresh'}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-2xl font-bold" style="color: #4FB3BF; font-family: 'Fredoka', sans-serif;">₼${item.price.toFixed(2)}</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm" style="font-family: 'Fredoka', sans-serif;">
+                                    <i class="fas fa-check-circle mr-1"></i> Available
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="col-span-full text-center text-gray-500 py-12">
+                        <i class="fas fa-utensils text-6xl mb-4"></i>
+                        <p class="text-xl" style="font-family: 'Fredoka', sans-serif;">No items available at the moment</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading popular items:', error);
+            const container = document.getElementById('popularItems');
+            container.innerHTML = `
+                <div class="col-span-full text-center text-gray-500 py-12">
+                    <i class="fas fa-exclamation-triangle text-6xl mb-4"></i>
+                    <p class="text-xl" style="font-family: 'Fredoka', sans-serif;">Unable to load items. Please try again later.</p>
+                </div>
+            `;
+        }
+    }
+    
     // Load data on page load
     document.addEventListener('DOMContentLoaded', function() {
-        loadAnnouncements();
+        loadPopularItems();
     });
 </script>
 {% endblock %}
