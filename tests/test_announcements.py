@@ -3,7 +3,6 @@ import json
 from models import db, Announcement
 
 # Using the common fixtures from test_auth.py for brevity (app, client, init_db, auth_headers)
-# In a real project, these fixtures would be in conftest.py
 
 @pytest.fixture
 def sample_announcement(init_db):
@@ -38,7 +37,7 @@ def test_create_announcement_admin_success(client, auth_headers):
     assert response.status_code == 201
     data = json.loads(response.data)
     assert data['announcement']['title'] == 'New Menu Item'
-    assert Announcement.query.count() == 1 # (Assuming this is the first one in this test)
+    assert Announcement.query.count() == 1 
 
 def test_create_announcement_student_forbidden(client, auth_headers):
     """Students cannot create announcements."""

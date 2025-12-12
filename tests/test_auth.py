@@ -2,20 +2,10 @@ import pytest
 import json
 from datetime import datetime, timedelta
 
-# Assuming the following structure:
-# from src.app import create_app, db
-# from src.models import User
-# from src.config import TestingConfig
-# from src.order import OrderHandler (not needed here, but for context)
-
-# --- Common Test Fixtures (To be placed in a shared conftest.py in a real project) ---
-
 @pytest.fixture(scope='session')
 def app():
     """Fixture for the main Flask application."""
-    # Assuming the app factory pattern is used:
-    # app = create_app(TestingConfig) 
-    # Since I don't have the actual app.py, I'll mock the necessary config:
+    
     from src.app import create_app
     from src.config import TestingConfig
     app = create_app(TestingConfig)
