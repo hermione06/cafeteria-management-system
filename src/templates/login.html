@@ -1,99 +1,89 @@
 {% extends "base.html" %}
 
-{% block title %}Login - CafeHub{% endblock %}
+{% block title %}Login - Bounty Cafeteria{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="min-h-[80vh] flex items-center justify-center">
-    <div class="max-w-md w-full">
-        <!-- Login Card -->
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <!-- Header -->
-            <div class="gradient-bg p-8 text-center">
-                <i class="fas fa-user-circle text-6xl text-white mb-4"></i>
-                <h2 class="text-3xl font-bold text-white">Welcome Back</h2>
-                <p class="text-white/80 mt-2">Login to your account</p>
-            </div>
-            
-            <!-- Form -->
-            <div class="p-8">
-                <form id="loginForm" class="space-y-6">
-                    <!-- Username -->
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">
-                            <i class="fas fa-user mr-2"></i> Username
-                        </label>
-                        <input 
-                            type="text" 
-                            id="username" 
-                            name="username"
-                            required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
-                            placeholder="Enter your username"
-                        >
-                    </div>
-                    
-                    <!-- Password -->
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">
-                            <i class="fas fa-lock mr-2"></i> Password
-                        </label>
-                        <div class="relative">
-                            <input 
-                                type="password" 
-                                id="password" 
-                                name="password"
-                                required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
-                                placeholder="Enter your password"
-                            >
-                            <button 
-                                type="button"
-                                onclick="togglePassword()"
-                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                            >
-                                <i id="passwordIcon" class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Remember Me & Forgot Password -->
-                    <div class="flex items-center justify-between">
-                        <label class="flex items-center">
-                            <input type="checkbox" class="mr-2 rounded">
-                            <span class="text-gray-600 text-sm">Remember me</span>
-                        </label>
-                        <a href="#" class="text-primary text-sm hover:underline">
-                            Forgot password?
-                        </a>
-                    </div>
-                    
-                    <!-- Submit Button -->
-                    <button 
-                        type="submit"
-                        class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition transform hover:scale-105 shadow-lg"
+<div class="login-container">
+    <div class="login-card">
+        <!-- Header -->
+        <div class="login-header">
+            <i class="fas fa-user-circle login-icon"></i>
+            <h2 class="login-title">Welcome Back</h2>
+            <p class="login-subtitle">Login to your account</p>
+        </div>
+        
+        <!-- Form -->
+        <div class="login-form">
+            <form id="loginForm">
+                <!-- Username -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user mr-2"></i> Username
+                    </label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username"
+                        required
+                        class="form-input"
+                        placeholder="Enter your username"
                     >
-                        <i class="fas fa-sign-in-alt mr-2"></i> Login
-                    </button>
-                </form>
+                </div>
                 
-                <!-- Divider -->
-                <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-4 bg-white text-gray-500">Don't have an account?</span>
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock mr-2"></i> Password
+                    </label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            required
+                            class="form-input"
+                            placeholder="Enter your password"
+                        >
+                        <button 
+                            type="button"
+                            onclick="togglePassword()"
+                            class="password-toggle"
+                        >
+                            <i id="passwordIcon" class="fas fa-eye"></i>
+                        </button>
                     </div>
                 </div>
                 
-                <!-- Sign Up Link -->
-                <a 
-                    href="/register"
-                    class="block w-full text-center border border-primary text-primary py-3 rounded-lg font-semibold hover:bg-primary hover:text-white transition"
+                <!-- Submit Button -->
+                <button 
+                    type="submit"
+                    class="login-button"
                 >
-                    <i class="fas fa-user-plus mr-2"></i> Create Account
-                </a>
+                    <i class="fas fa-sign-in-alt mr-2"></i> Login
+                </button>
+            </form>
+            
+            <!-- Divider -->
+            <div class="divider-container">
+                <div class="divider-line">
+                    <div class="divider-line-inner"></div>
+                </div>
+                <div class="divider-text-wrapper">
+                    <span class="divider-text">Don't have an account?</span>
+                </div>
             </div>
+            
+            <!-- Sign Up Link -->
+            <a 
+                href="/register"
+                class="signup-button"
+            >
+                <i class="fas fa-user-plus mr-2"></i> Create Account
+            </a>
         </div>
     </div>
 </div>

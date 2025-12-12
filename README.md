@@ -297,7 +297,7 @@ flake8 .
 
 2. **Use a production server**
 ```bash
-gunicorn -w 4 -b 0.0.0.0:5000 app:app
+gunicorn -w 4 -b 0.0.0.0:5000 app:src
 ```
 
 3. **Enable HTTPS**

@@ -1,78 +1,90 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - CafeHub{% endblock %}
+{% block title %}Dashboard - Bounty Cafeteria{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
 
 {% block content %}
+<!-- Page Header -->
+<div class="dashboard-header">
+    <div class="gradient-box-dashboard">
+        <h1 class="dashboard-title">dashboard</h1>
+    </div>
+    <p class="dashboard-subtitle">MANAGE YOUR ORDERS & ACCOUNT</p>
+</div>
+
 <!-- Welcome Section -->
-<div class="gradient-bg rounded-2xl shadow-2xl p-8 mb-8 text-white">
-    <h1 class="text-3xl font-bold mb-2">
+<div class="welcome-section">
+    <h2 class="welcome-title">
         <i class="fas fa-home mr-3"></i> Welcome back, <span id="userName">User</span>!
-    </h1>
-    <p class="text-white/80">Here's what's happening with your orders</p>
+    </h2>
+    <p class="welcome-text">Here's what's happening with your orders</p>
 </div>
 
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <!-- Total Orders -->
-    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition">
+    <div class="stats-card stats-primary">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Total Orders</p>
-                <p class="text-3xl font-bold text-gray-800" id="totalOrders">0</p>
+                <p class="stats-label">Total Orders</p>
+                <p class="stats-value" id="totalOrders">0</p>
             </div>
-            <div class="bg-blue-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-shopping-cart text-2xl text-primary"></i>
+            <div class="stats-icon">
+                <i class="fas fa-shopping-cart"></i>
             </div>
         </div>
     </div>
     
     <!-- Pending Orders -->
-    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition">
+    <div class="stats-card stats-warning">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Pending</p>
-                <p class="text-3xl font-bold text-yellow-600" id="pendingOrders">0</p>
+                <p class="stats-label">Pending</p>
+                <p class="stats-value" id="pendingOrders">0</p>
             </div>
-            <div class="bg-yellow-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-clock text-2xl text-yellow-600"></i>
+            <div class="stats-icon">
+                <i class="fas fa-clock"></i>
             </div>
         </div>
     </div>
     
     <!-- Completed Orders -->
-    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition">
+    <div class="stats-card stats-success">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Completed</p>
-                <p class="text-3xl font-bold text-green-600" id="completedOrders">0</p>
+                <p class="stats-label">Completed</p>
+                <p class="stats-value" id="completedOrders">0</p>
             </div>
-            <div class="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-check-circle text-2xl text-green-600"></i>
+            <div class="stats-icon">
+                <i class="fas fa-check-circle"></i>
             </div>
         </div>
     </div>
     
     <!-- Total Spent -->
-    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition">
+    <div class="stats-card stats-purple">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-600 text-sm">Total Spent</p>
-                <p class="text-3xl font-bold text-purple-600">$<span id="totalSpent">0.00</span></p>
+                <p class="stats-label">Total Spent</p>
+                <p class="stats-value">₼<span id="totalSpent">0.00</span></p>
             </div>
-            <div class="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center">
-                <i class="fas fa-dollar-sign text-2xl text-purple-600"></i>
+            <div class="stats-icon">
+                <i class="fas fa-dollar-sign"></i>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Recent Orders -->
-<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">
+<div class="orders-section">
+    <div class="section-header">
+        <h2 class="section-title">
             <i class="fas fa-history mr-2"></i> Recent Orders
         </h2>
-        <a href="/orders" class="text-primary hover:text-blue-600 font-semibold">
+        <a href="/orders" class="view-all-link">
             View All <i class="fas fa-arrow-right ml-1"></i>
         </a>
     </div>
@@ -84,22 +96,22 @@
 
 <!-- Quick Actions -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <a href="/menu" class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-8 text-white hover:shadow-2xl transition transform hover:-translate-y-2">
-        <i class="fas fa-book-open text-4xl mb-4"></i>
-        <h3 class="text-xl font-bold mb-2">Browse Menu</h3>
-        <p class="text-white/80">Explore our delicious offerings</p>
+    <a href="/menu" class="action-card action-menu">
+        <i class="fas fa-book-open"></i>
+        <h3>Browse Menu</h3>
+        <p>Explore our delicious offerings</p>
     </a>
     
-    <a href="/orders" class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-8 text-white hover:shadow-2xl transition transform hover:-translate-y-2">
-        <i class="fas fa-list text-4xl mb-4"></i>
-        <h3 class="text-xl font-bold mb-2">My Orders</h3>
-        <p class="text-white/80">Track your order history</p>
+    <a href="/orders" class="action-card action-orders">
+        <i class="fas fa-list"></i>
+        <h3>My Orders</h3>
+        <p>Track your order history</p>
     </a>
     
-    <a href="/profile" class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-8 text-white hover:shadow-2xl transition transform hover:-translate-y-2">
-        <i class="fas fa-user text-4xl mb-4"></i>
-        <h3 class="text-xl font-bold mb-2">My Profile</h3>
-        <p class="text-white/80">Update your information</p>
+    <a href="/profile" class="action-card action-profile">
+        <i class="fas fa-user"></i>
+        <h3>My Account</h3>
+        <p>Update your information</p>
     </a>
 </div>
 {% endblock %}
