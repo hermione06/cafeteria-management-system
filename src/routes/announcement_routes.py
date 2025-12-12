@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from src.models import db, Announcement
 from src.utils.decorators import admin_required
 from datetime import datetime, timezone
+from sqlalchemy import case
 
 announcement_bp = Blueprint('announcements', __name__)
 
@@ -13,6 +14,13 @@ def get_announcements():
     try:
         # Get only active, non-expired announcements
         now = datetime.now(timezone.utc)
+         # Explicit priority order: high → normal → low
+        priority_order = case(
+            (Announcement.priority == "high", 1),
+            (Announcement.priority == "normal", 2),
+            (Announcement.priority == "low", 3),
+            else_=4
+        )
         
         announcements = Announcement.query.filter(
             Announcement.is_active == True,
@@ -21,7 +29,7 @@ def get_announcements():
                 Announcement.expires_at > now
             )
         ).order_by(
-            Announcement.priority.desc(),
+            priority_order,
             Announcement.created_at.desc()
         ).all()
         

@@ -90,6 +90,7 @@ flask db upgrade
 6. **Run the application**
 ```bash
 python app.py
+python -m src.app
 # Or using Flask CLI:
 flask run
 ```
