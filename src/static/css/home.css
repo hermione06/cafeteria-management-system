@@ -1,0 +1,407 @@
+/* League Spartan for bounty title only */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=League+Spartan:wght@100..900&display=swap');
+
+body {
+    overflow-y: hidden; /* Prevents horizontal scrolling */
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+}
+
+/* Hero Section Styles */
+.hero-container {
+    position: relative;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3rem 4rem;
+    margin-bottom: 3rem;
+}
+
+.hero-left {
+    position: relative;
+    z-index: 10;
+    flex: 0 0 50%;
+    /* move text more to the left */
+    margin-left: -19rem; /* adjust as needed */
+}
+
+.hero-right {
+    position: relative;
+    z-index: 10;
+    flex: 0 0 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Gradient Box - Rectangular, top to bottom */
+.gradient-box {
+    position: absolute;
+    left: -250px;
+    top: 80px;
+    width: 800px;
+    height: 200px;
+    background: linear-gradient(180deg, #fff963 0%, #ffffff00 100%);
+    border-radius: 0px;
+    z-index: 1;
+}
+
+.bounty-title {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 15rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+    line-height: 0.85;
+    margin-bottom: 0.5rem;
+    margin-top: -22rem;
+    position: relative;
+    z-index: 10;
+    letter-spacing: 8px;
+    padding-right: 4rem; 
+}
+
+.bounty-subtitle {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #4cb290;
+    margin-bottom: 0;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 10;
+    letter-spacing: 0.5px;
+    left: 250px;  /* moves left */
+    top: -40px;    /* moves down */
+}
+
+.announcements-btn {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    background: #4cb290;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(76, 178, 144, 0.4);
+    position: relative;
+    z-index: 10;
+    left: 280px;
+    top: -20px;
+}
+
+.announcements-btn:hover {
+    background: #3da080;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(76, 178, 144, 0.6);
+}
+
+/* Buttons on the RIGHT side */
+.hero-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+    max-width: 420px;
+}
+
+.hero-btn {
+    background: #FFE66D;
+    color: white;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2rem 3rem;
+    border-radius: 70px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(255, 230, 109, 0.6);
+    transition: all 0.3s ease;
+    letter-spacing: 2px;
+    display: block;
+    cursor: pointer;
+    border: none;
+}
+
+.hero-btn:hover {
+    background: #FFD93D;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(255, 230, 109, 0.8);
+}
+
+/* Decorative Images */
+.decoration-images {
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 3rem;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.decoration-item {
+    width: 300px;
+    height: auto;
+    object-fit: contain;
+}
+
+.decoration-left {
+    margin-bottom: 0;
+}
+
+.decoration-center {
+    margin-bottom: 20px;
+}
+
+.decoration-right {
+    margin-bottom: 0;
+}
+
+/* Popup Modal Styles */
+.popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.popup-overlay.active {
+    display: flex !important;
+}
+
+.popup-content {
+    background: white;
+    border-radius: 30px;
+    padding: 3rem;
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease;
+}
+
+.popup-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: #FFE66D;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.popup-close:hover {
+    background: #FFD93D;
+    transform: rotate(90deg);
+}
+
+.popup-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #4cb290;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.popup-feature {
+    background: #f8f9fa;
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.popup-feature:hover {
+    transform: translateX(10px);
+    box-shadow: 0 5px 15px rgba(76, 178, 144, 0.2);
+}
+
+.popup-icon {
+    background: linear-gradient(135deg, #4cb290 0%, #5cc9a5 100%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.popup-feature-content h3 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2D3748;
+    margin-bottom: 0.5rem;
+}
+
+.popup-feature-content p {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1rem;
+    color: #4A5568;
+    line-height: 1.6;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .bounty-title {
+        font-size: 7rem;
+    }
+    
+    .gradient-box {
+        width: 380px;
+        height: 300px;
+    }
+    
+    .hero-btn {
+        font-size: 1.4rem;
+        padding: 1.2rem 2rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .bounty-title {
+        font-size: 6rem;
+    }
+    
+    .gradient-box {
+        width: 350px;
+        height: 280px;
+        left: 30px;
+        top: 60px;
+    }
+    
+    .decoration-item {
+        width: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Remove decorations completely on mobile */
+    .decoration-images {
+        display: none !important;
+    }
+    
+    .hero-container {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem 1rem;
+        min-height: 500px;
+    }
+    
+    .hero-left,
+    .hero-right {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+    
+    .hero-left {
+        margin-bottom: 3rem;
+        margin-left: 0;
+    }
+    
+    .bounty-title {
+        font-size: 4.5rem;
+        margin-top: 0;
+        padding-right: 0;
+    }
+    
+    .bounty-subtitle {
+        left: 0;
+        top: 0;
+    }
+    
+    .announcements-btn {
+        left: 0;
+        top: 0;
+    }
+    
+    .gradient-box {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 300px;
+        height: 240px;
+        top: 40px;
+    }
+    
+    .hero-buttons {
+        margin: 0 auto;
+        max-width: 300px;
+    }
+    
+    .hero-btn {
+        font-size: 1.3rem;
+        padding: 1.1rem 2rem;
+    }
+
+    .popup-content {
+        padding: 2rem;
+        max-width: 95%;
+    }
+    
+    .popup-title {
+        font-size: 2rem;
+    }
+    
+    .popup-feature {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    
+    .page-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100vh; /* full viewport height */
+        overflow: hidden; /* crop anything outside the viewport */
+    }
+}
