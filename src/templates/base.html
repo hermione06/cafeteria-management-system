@@ -37,27 +37,27 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-        <!-- Background + Decorative Wrapper -->
+    <!-- Background + Decorative Wrapper -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <!-- Gradient Background -->
         <div class="absolute inset-0 bg-gradient-to-b from-[#cdffd8] to-[#94b9ff]"></div>
 
-    <div class="wave-bottom">
-        <svg 
-            width="100%" 
-            height="256" 
-            style="position: absolute; bottom: 0; left: 0;" 
-            viewBox="0 0 1440 256" 
-            xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="none"
-        >
-            <defs>
-                <clipPath id="waveClip">
-                    <path d="M0,100 C400,200 800,0 1440,100 L1440,256 L0,256 Z"></path>
-                </clipPath>
-            </defs>
-            <rect width="100%" height="100%" fill="white" clip-path="url(#waveClip)"></rect>
-        </svg>
+        <div class="wave-bottom">
+            <svg 
+                width="100%" 
+                height="256" 
+                style="position: absolute; bottom: 0; left: 0;" 
+                viewBox="0 0 1440 256" 
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="none"
+            >
+                <defs>
+                    <clipPath id="waveClip">
+                        <path d="M0,100 C400,200 800,0 1440,100 L1440,256 L0,256 Z"></path>
+                    </clipPath>
+                </defs>
+                <rect width="100%" height="100%" fill="white" clip-path="url(#waveClip)"></rect>
+            </svg>
         </div>
 
         <!-- Tropical Images -->
@@ -74,11 +74,9 @@
             class="absolute left-[-10px] top-[500px] w-[450px] rotate-[0deg] opacity-100">
     </div>
 
-
     <!-- Navigation -->
     <nav class="bg-[#3fc7df] shadow-lg sticky top-0 z-50" style="font-family: 'Fredoka', sans-serif;">
         <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center text-white font-bold">
-
             <!-- Left -->
             <div class="flex space-x-10 tracking-wide flex-1">
                 <a href="/">HOME</a>
@@ -121,15 +119,14 @@
     
     <!-- Footer -->
     <footer class="fixed bottom-0 left-0 w-full z-50">
-        <div class="bg-[#3fc7df] h-2 hover:h-32 transition-all duration-500 overflow-hidden relative">
-            <div class="flex flex-col items-center justify-center h-full text-white opacity-0 hover:opacity-100 transition-opacity duration-500" style="font-family: 'Fredoka', sans-serif;">
+        <div class="bg-[#3fc7df] h-2 hover:h-32 transition-all duration-500 overflow-hidden relative group">
+            <div class="flex flex-col items-center justify-center h-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="font-family: 'Fredoka', sans-serif;">
                 <p class="mb-2 text-lg tracking-wide font-bold">&copy; 2025 UFAZ CAFETERIA. ALL RIGHTS RESERVED.</p>
                 <div class="flex space-x-4">
                 </div>
             </div>
         </div>
     </footer>
-
 
     <!-- Scripts -->
     <script>
@@ -258,7 +255,5 @@
     </script>
     
     {% block extra_js %}{% endblock %}
-
-</div>
 </body>
 </html>
