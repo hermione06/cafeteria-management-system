@@ -2,7 +2,7 @@
 FROM python:3.10-slim
 
 # Set the working directory inside the container
-WORKDIR /src
+WORKDIR /app
 
 # Install system dependencies (if needed for your Python packages)
 RUN apt-get update && apt-get install -y \
@@ -28,4 +28,4 @@ ENV FLASK_APP=src/app.py
 ENV PYTHONUNBUFFERED=1
 
 # Use Gunicorn for production (more stable than Flask dev server)
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "src.app:create_app()"]
