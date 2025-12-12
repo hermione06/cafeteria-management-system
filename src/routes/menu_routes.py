@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt
-from models import db, MenuItem
-from utils.decorators import admin_required, staff_or_admin_required
-from utils.pagination import paginate
+from src.models import db, MenuItem
+from src.utils.decorators import admin_required, staff_or_admin_required
+from src.utils.pagination import paginate
 
 menu_bp = Blueprint('menu', __name__)
 

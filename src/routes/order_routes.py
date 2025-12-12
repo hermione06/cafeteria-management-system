@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-from models import db, Order, OrderItem, MenuItem
-from utils.decorators import admin_required, staff_or_admin_required
-from utils.pagination import paginate
+from src.models import db, Order, OrderItem, MenuItem
+from src.utils.decorators import admin_required, staff_or_admin_required
+from src.utils.pagination import paginate
 from datetime import datetime, timezone
 
 order_bp = Blueprint('orders', __name__)

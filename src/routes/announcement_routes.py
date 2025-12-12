@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Announcement
-from utils.decorators import admin_required
+from src.models import db, Announcement
+from src.utils.decorators import admin_required
 from datetime import datetime, timezone
 
 announcement_bp = Blueprint('announcements', __name__)

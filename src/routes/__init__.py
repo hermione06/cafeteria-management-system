@@ -1,11 +1,11 @@
 """
 Centralized route registration
 """
-from routes.auth_routes import auth_bp
-from routes.user_routes import user_bp
-from routes.menu_routes import menu_bp
-from routes.order_routes import order_bp
-from routes.announcement_routes import announcement_bp
+from .auth_routes import auth_bp
+from .user_routes import user_bp
+from .menu_routes import menu_bp
+from .order_routes import order_bp
+from .announcement_routes import announcement_bp
 
 
 def register_routes(app):

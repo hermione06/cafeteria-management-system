@@ -4,9 +4,9 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 
-from models import db
-from config import config
-from routes import register_routes
+from .models import db
+from src.config import config
+from src.routes import register_routes
 
 
 def create_app(config_name=None):

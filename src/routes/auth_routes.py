@@ -6,7 +6,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_jwt
 )
-from models import db, User
+from src.models import db, User
 from email_validator import validate_email, EmailNotValidError
 from datetime import datetime, timezone
 
