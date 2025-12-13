@@ -198,7 +198,7 @@ def admin_token(app, admin_user):
         # Push an explicit request context to ensure JWT is fully initialized
         with app.test_request_context():
             token = create_access_token(
-                identity=admin_user.id,
+                identity=str(admin_user.id),
                 additional_claims={
                     'role': admin_user.role,
                     'username': admin_user.username
@@ -213,7 +213,7 @@ def staff_token(app, staff_user):
     with app.app_context():
         with app.test_request_context():
             token = create_access_token(
-                identity=staff_user.id,
+                identity=str(staff_user.id),
                 additional_claims={
                     'role': staff_user.role,
                     'username': staff_user.username
@@ -228,7 +228,7 @@ def user_token(app, regular_user):
     with app.app_context():
         with app.test_request_context():
             token = create_access_token(
-                identity=regular_user.id,
+                identity=str(regular_user.id),
                 additional_claims={
                     'role': regular_user.role,
                     'username': regular_user.username
