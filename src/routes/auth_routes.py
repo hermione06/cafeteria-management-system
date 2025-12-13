@@ -9,7 +9,6 @@ from flask_jwt_extended import (
 from src.models import db, User
 from email_validator import validate_email, EmailNotValidError
 from datetime import datetime, timezone
-from src.utils.email import send_verification_email
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -63,13 +62,10 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        # Send verification email
-        send_verification_email(user, verification_token)
-        
         return jsonify({
-            "message": "User registered successfully. Please check your email to verify your account.",
-            "user": user.to_dict()
-            # Don't send verification_token in response anymore
+            "message": "User registered successfully. Please verify your email.",
+            "user": user.to_dict(),
+            "verification_token": verification_token
         }), 201
         
     except Exception as e:
@@ -135,7 +131,7 @@ def login():
             identity=str(user.id),
             additional_claims={"role": user.role, "username": user.username}
         )
-        refresh_token = create_refresh_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             "message": "Login successful",

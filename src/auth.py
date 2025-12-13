@@ -121,10 +121,10 @@ def login():
         
         # Create tokens
         access_token = create_access_token(
-            identity=user.id,
+            identity=str(user.id),
             additional_claims={"role": user.role}
         )
-        refresh_token = create_refresh_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             "message": "Login successful",
@@ -150,7 +150,7 @@ def refresh():
     
     # Create new access token
     access_token = create_access_token(
-        identity=user.id,
+        identity=str(user.id),
         additional_claims={"role": user.role}
     )
     
