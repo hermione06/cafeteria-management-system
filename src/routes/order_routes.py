@@ -65,7 +65,7 @@ def get_orders():
 def get_order(order_id):
     """Get a specific order"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity)()
         claims = get_jwt()
         role = claims.get('role')
         
@@ -89,7 +89,7 @@ def get_order(order_id):
 def create_order():
     """Create a new order"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity)()
         data = request.get_json()
         
         # Validate items
@@ -154,7 +154,7 @@ def create_order():
 def add_order_item(order_id):
     """Add an item to an existing order"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity)()
         order = db.session.get(Order, order_id)
         
         if not order:
@@ -219,7 +219,7 @@ def add_order_item(order_id):
 def remove_order_item(order_id, item_id):
     """Remove an item from an order"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity)()
         order = db.session.get(Order, order_id)
         
         if not order:
@@ -332,7 +332,7 @@ def update_payment_status(order_id):
 def delete_order(order_id):
     """Delete an order (user can delete own pending orders, admin can delete any)"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity)()
         claims = get_jwt()
         role = claims.get('role')
         
