@@ -30,14 +30,10 @@ jobs:
         with:
           python-version: '3.10'
       
-      # Step 3: Cache pip dependencies for faster builds
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      # Step 3: Clear pip cache to ensure fresh install
+      - name: Clear pip cache
+        run: |
+          python -m pip cache purge || true
       
       # Step 4: Install project dependencies
       - name: Install dependencies
@@ -45,18 +41,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      # Step 5: Run tests with pytest
+      # Step 5: Verify configuration is loaded correctly
+      - name: Verify test configuration
+        run: |
+          python -c "from src.config import TestingConfig; print('SECRET_KEY:', TestingConfig.SECRET_KEY)"
+          python -c "from src.config import TestingConfig; print('JWT_SECRET_KEY:', TestingConfig.JWT_SECRET_KEY)"
+          python -c "from src.config import TestingConfig; print('TESTING:', TestingConfig.TESTING)"
+      
+      # Step 6: Run tests with pytest
       - name: Run tests
         run: |
           pytest -v --tb=short
       
-      # Step 6: Generate test coverage report
+      # Step 7: Generate test coverage report
       - name: Test coverage
         run: |
           pip install pytest-cov
           pytest --cov=src --cov-report=term-missing --cov-report=xml
       
-      # Step 7: Upload coverage to artifacts (optional)
+      # Step 8: Upload coverage to artifacts
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         if: always()
