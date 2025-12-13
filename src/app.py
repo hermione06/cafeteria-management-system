@@ -28,6 +28,11 @@ def create_app(config_name=None):
     migrate = Migrate(app, db)
     jwt = JWTManager(app)
     CORS(app)
+
+    with app.app_context():
+        from src.models import User, Order, OrderItem, MenuItem, Announcement   # import all models
+        db.create_all()
+        print("✅ Database tables created/verified")
     
     # Register all routes
     register_routes(app)
