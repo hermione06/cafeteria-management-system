@@ -48,6 +48,7 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'test-jwt-secret-key-for-ci')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=5)
     WTF_CSRF_ENABLED = False
 
