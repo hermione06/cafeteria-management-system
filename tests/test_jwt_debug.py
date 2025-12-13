@@ -39,12 +39,12 @@ def test_token_creation_and_validation(app, client):
         print("\n" + "="*60)
         print("TOKEN CREATION TEST")
         print("="*60)
-        print(f"User ID: {user.id}")
+        print(f"User ID: {str(user.id)}")
         print(f"User role: {user.role}")
         
         # Create token
         token = create_access_token(
-            identity=user.id,
+            identity=str(str(user.id)),
             additional_claims={'role': user.role, 'username': user.username}
         )
         print(f"Token created: {token[:50]}...")
