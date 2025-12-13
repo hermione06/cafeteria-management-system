@@ -132,7 +132,7 @@ def login():
         
         # Create tokens
         access_token = create_access_token(
-            identity=user.id,
+            identity=str(user.id),
             additional_claims={"role": user.role, "username": user.username}
         )
         refresh_token = create_refresh_token(identity=user.id)
@@ -165,7 +165,7 @@ def refresh():
         
         # Create new access token
         access_token = create_access_token(
-            identity=user.id,
+            identity=str(user.id),
             additional_claims={"role": user.role, "username": user.username}
         )
         
