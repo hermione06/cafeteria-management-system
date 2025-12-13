@@ -12,6 +12,13 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     
+    # Set environment variables at the JOB level, not step level
+    env:
+      SECRET_KEY: "test-secret-key-for-ci"
+      JWT_SECRET_KEY: "test-jwt-secret-key-for-ci"
+      FLASK_ENV: "testing"
+      TESTING: "true"
+    
     steps:
       # Step 1: Checkout the repository code
       - name: Checkout code
@@ -38,35 +45,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      # Step 5: Debug Python environment (optional, for troubleshooting)
-      - name: Debug environment
-        run: |
-          python --version
-          pip list | grep -i jwt || echo "PyJWT not found"
-          python -c "import sys; print('Python path:', sys.executable)"
-      
-      # Step 6: Run tests with pytest
+      # Step 5: Run tests with pytest
       - name: Run tests
-        env:
-          SECRET_KEY: "test-secret"
-          JWT_SECRET_KEY: "test-jwt-secret-key-for-ci"
-          FLASK_ENV: "testing"
-          TESTING: "true"
         run: |
           pytest -v --tb=short
       
-      # Step 7: Generate test coverage report
+      # Step 6: Generate test coverage report
       - name: Test coverage
-        env:
-          SECRET_KEY: "test-secret"
-          JWT_SECRET_KEY: "test-jwt-secret-key-for-ci"
-          FLASK_ENV: "testing"
-          TESTING: "true"
         run: |
           pip install pytest-cov
           pytest --cov=src --cov-report=term-missing --cov-report=xml
       
-      # Step 8: Upload coverage to artifacts (optional)
+      # Step 7: Upload coverage to artifacts (optional)
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         if: always()
