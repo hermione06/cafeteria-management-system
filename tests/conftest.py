@@ -193,44 +193,48 @@ def inactive_user(app):
 @pytest.fixture
 def admin_token(app, admin_user):
     """Create admin JWT token"""
+    # Ensure we're in the correct app context
     with app.app_context():
-        # Query the user fresh from database in this context
-        user = db.session.get(User, admin_user.id)
-        return create_access_token(
-            identity=user.id,
-            additional_claims={
-                'role': user.role,
-                'username': user.username
-            }
-        )
+        # Push an explicit request context to ensure JWT is fully initialized
+        with app.test_request_context():
+            token = create_access_token(
+                identity=admin_user.id,
+                additional_claims={
+                    'role': admin_user.role,
+                    'username': admin_user.username
+                }
+            )
+            return token
 
 
 @pytest.fixture
 def staff_token(app, staff_user):
     """Create staff JWT token"""
     with app.app_context():
-        user = db.session.get(User, staff_user.id)
-        return create_access_token(
-            identity=user.id,
-            additional_claims={
-                'role': user.role,
-                'username': user.username
-            }
-        )
+        with app.test_request_context():
+            token = create_access_token(
+                identity=staff_user.id,
+                additional_claims={
+                    'role': staff_user.role,
+                    'username': staff_user.username
+                }
+            )
+            return token
 
 
 @pytest.fixture
 def user_token(app, regular_user):
     """Create regular user JWT token"""
     with app.app_context():
-        user = db.session.get(User, regular_user.id)
-        return create_access_token(
-            identity=user.id,
-            additional_claims={
-                'role': user.role,
-                'username': user.username
-            }
-        )
+        with app.test_request_context():
+            token = create_access_token(
+                identity=regular_user.id,
+                additional_claims={
+                    'role': regular_user.role,
+                    'username': regular_user.username
+                }
+            )
+            return token
 
 
 @pytest.fixture
@@ -249,7 +253,6 @@ def admin_headers(admin_token):
 def staff_headers(staff_token):
     """Create authorization headers with staff token"""
     return {'Authorization': f'Bearer {staff_token}'}
-
 
 # ==================== MENU ITEM FIXTURES ====================
 
