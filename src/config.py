@@ -4,6 +4,11 @@ from datetime import timedelta
 
 basedir = Path(__file__).resolve().parent.parent
 
+# Only load .env if not in testing mode
+if os.environ.get('FLASK_ENV') != 'testing' and os.environ.get('TESTING') != 'true':
+    from dotenv import load_dotenv
+    load_dotenv()
+
 
 class Config:
     """Base configuration"""
@@ -48,7 +53,9 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'test-jwt-secret-key-for-ci')
+    # Ensure consistent JWT keys for testing
+    SECRET_KEY = 'test-secret-key-for-ci'
+    JWT_SECRET_KEY = 'test-jwt-secret-key-for-ci'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=5)
     WTF_CSRF_ENABLED = False
 
