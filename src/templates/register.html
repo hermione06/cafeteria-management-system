@@ -163,11 +163,6 @@
             return;
         }
         
-        if (!terms) {
-            showFlash('Please agree to the terms and conditions', 'error');
-            return;
-        }
-        
         try {
             const response = await fetch(`${API_BASE}/auth/register`, {
                 method: 'POST',
