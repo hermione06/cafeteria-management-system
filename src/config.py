@@ -70,7 +70,7 @@ class ProductionConfig(Config):
     TESTING = False
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        f'sqlite:///{basedir}/instance/cafeteria.db'
+        f'sqlite:///{basedir}/tmp/cafeteria.db'
 
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
