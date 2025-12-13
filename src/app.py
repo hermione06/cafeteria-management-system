@@ -12,7 +12,6 @@ from src.routes import register_routes
 def create_app(config_name=None):
     """Application factory pattern"""
     app = Flask(__name__)
-    app.secret_key = 'your-secret-key-here'  # Change in production
     
     # Load configuration
     if config_name is None:
