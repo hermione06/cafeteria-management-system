@@ -2,14 +2,14 @@
 Email utility functions for sending emails
 """
 from flask import current_app, url_for
-from flask_mail import Mail, Message
+from flask_mail import Message
 from threading import Thread
 
 
 def send_async_email(app, msg):
     """Send email asynchronously"""
     with app.app_context():
-        mail = Mail(app)
+        mail = app.extensions.get('mail')
         mail.send(msg)
 
 
@@ -25,6 +25,7 @@ def send_email(subject, recipients, text_body, html_body=None):
     """
     try:
         app = current_app._get_current_object()
+        
         msg = Message(
             subject=subject,
             sender=app.config['MAIL_DEFAULT_SENDER'],
@@ -186,7 +187,7 @@ Your email has been verified successfully. You can now:
 - Track your order history
 - Manage your account
 
-Login here: {url_for('auth.login', _external=True)}
+Login here: {url_for('login_page', _external=True)}
 
 Enjoy your meals!
 
@@ -222,7 +223,7 @@ Cafeteria Management Team
             <div class="feature">✅ Track your order history</div>
             <div class="feature">✅ Manage your account</div>
             <center>
-                <a href="{url_for('auth.login', _external=True)}" class="button">Go to Login</a>
+                <a href="{url_for('login_page', _external=True)}" class="button">Go to Login</a>
             </center>
             <p style="margin-top: 30px;">Enjoy your meals! 🍽️</p>
         </div>
