@@ -61,7 +61,7 @@ def get_users():
 def get_user(user_id):
     """Get a specific user - users can view own profile, admins can view all"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())  # Convert to int
         claims = get_jwt()
         role = claims.get('role')
         
@@ -85,7 +85,7 @@ def get_user(user_id):
 def update_user(user_id):
     """Update user - users can update own profile, admins can update any"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())  # Convert to int
         claims = get_jwt()
         role = claims.get('role')
         
@@ -161,7 +161,7 @@ def update_user(user_id):
 def delete_user(user_id):
     """Delete a user (Admin only)"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())  # Convert to int
         
         # Prevent self-deletion
         if current_user_id == user_id:
