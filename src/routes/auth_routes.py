@@ -119,8 +119,8 @@ def login():
             return jsonify({"error": "Account is deactivated"}), 403
         
         # Check if email is verified
-        if not user.is_verified:
-            return jsonify({"error": "Please verify your email before logging in"}), 403
+        #if not user.is_verified:
+            #return jsonify({"error": "Please verify your email before logging in"}), 403
         
         # Update last login
         user.update_last_login()
